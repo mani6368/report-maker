@@ -49,7 +49,7 @@ function App() {
   return (
     <div className="container animate-fade-in" style={{ padding: '4rem 1rem', textAlign: 'center' }}>
       <header style={{ marginBottom: '3rem' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '50%', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'rgba(234, 179, 8, 0.1)', borderRadius: '50%', marginBottom: '1.5rem' }}>
           <Sparkles size={32} color="var(--color-accent-primary)" />
         </div>
         <h1 style={{ fontSize: '3rem', margin: '0 0 1rem 0', lineHeight: 1.2 }}>

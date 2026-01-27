@@ -7,9 +7,9 @@
   --color-bg-card: #1e293b;
   --color-text-primary: #f8fafc;
   --color-text-secondary: #94a3b8;
-  --color-accent-primary: #6366f1;
-  --color-accent-secondary: #8b5cf6;
-  --color-accent-glow: rgba(99, 102, 241, 0.5);
+  --color-accent-primary: #eab308;
+  --color-accent-secondary: #f59e0b;
+  --color-accent-glow: rgba(234, 179, 8, 0.5);
 
   --gradient-main: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
   --gradient-bg: radial-gradient(circle at top center, #1e293b 0%, #0f172a 100%);
