@@ -1,0 +1,175 @@
+/* SparkleButton.css */
+.sparkle-btn-container {
+    /* Scoped variables for the button */
+    --btn-color: #3b82f6;
+    /* Blue to match theme */
+    --btn-shadow: rgba(59, 130, 246, 0.4);
+    --btn-glare: rgba(255, 255, 255, 0.75);
+    --btn-font-size: 1rem;
+    --btn-padding: 0.75rem 1.5rem;
+    --btn-hover: 0;
+    --btn-pos: 0;
+}
+
+.sparkle-btn {
+    padding: var(--btn-padding);
+    border-radius: 12px;
+    text-decoration: none;
+    color: transparent;
+    position: relative;
+    transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-family: inherit;
+    width: 100%;
+}
+
+.sparkle-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    --btn-hover: 1;
+    --btn-pos: 1;
+}
+
+.sparkle-btn:active {
+    --btn-hover: 0;
+}
+
+.sparkle-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Text Content Wrapper */
+.sparkle-btn-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--btn-font-size);
+    font-weight: 600;
+    transition: all 0.2s;
+    text-decoration: none;
+    pointer-events: none;
+
+    /* Text Shadow Effect */
+    text-shadow:
+        calc(var(--btn-hover) * (var(--btn-font-size) * -0)) calc(var(--btn-hover) * (var(--btn-font-size) * 0)) var(--btn-shadow),
+        calc(var(--btn-hover) * (var(--btn-font-size) * -0.02)) calc(var(--btn-hover) * (var(--btn-font-size) * 0.02)) var(--btn-shadow),
+        calc(var(--btn-hover) * (var(--btn-font-size) * -0.04)) calc(var(--btn-hover) * (var(--btn-font-size) * 0.04)) var(--btn-shadow);
+
+    transform: translate(calc(var(--btn-hover) * (var(--btn-font-size) * 0.10)), calc(var(--btn-hover) * (var(--btn-font-size) * -0.10)));
+}
+
+/* Gradient Text Overlay */
+.sparkle-btn-content-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    background: linear-gradient(108deg,
+            transparent 0 55%,
+            var(--btn-glare) 55% 60%,
+            transparent 60% 70%,
+            var(--btn-glare) 70% 85%,
+            transparent 85%) calc(var(--btn-pos) * -200%) 0% / 200% 100%, var(--btn-color);
+
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    z-index: 2;
+    text-shadow: none;
+
+    transform: translate(calc(var(--btn-hover) * (var(--btn-font-size) * 0.10)), calc(var(--btn-hover) * (var(--btn-font-size) * -0.10)));
+    transition: transform 0.2s, background-position 0s;
+}
+
+.sparkle-btn:hover .sparkle-btn-content-overlay {
+    transition: transform 0.2s, background-position calc(var(--btn-hover) * 1.5s) calc(var(--btn-hover) * 0.25s);
+}
+
+.sparkle-btn:active .sparkle-btn-content-overlay {
+    --btn-hover: 0;
+    --btn-pos: 1;
+}
+
+/* Sparkles SVGs */
+.sparkle-icon {
+    position: absolute;
+    z-index: 3;
+    width: calc(var(--btn-font-size) * 0.8);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%) scale(0);
+    pointer-events: none;
+}
+
+.sparkle-icon path {
+    fill: var(--btn-glare);
+}
+
+.sparkle-btn:hover .sparkle-icon {
+    animation: sparkle-anim 0.75s calc((var(--delay-step) * var(--d)) * 1s) both;
+}
+
+@keyframes sparkle-anim {
+    50% {
+        transform: translate(-50%, -50%) scale(var(--s, 1));
+    }
+}
+
+/* Sparkle Positions */
+.sparkle-1 {
+    --x: 0;
+    --y: 20;
+    --s: 1.1;
+    --d: 1;
+    --delay-step: 0.15;
+    top: calc(var(--y) * 1%);
+    left: calc(var(--x) * 1%);
+}
+
+.sparkle-2 {
+    --x: 15;
+    --y: 80;
+    --s: 1.25;
+    --d: 2;
+    --delay-step: 0.15;
+    top: calc(var(--y) * 1%);
+    left: calc(var(--x) * 1%);
+}
+
+.sparkle-3 {
+    --x: 45;
+    --y: 40;
+    --s: 1.1;
+    --d: 3;
+    --delay-step: 0.15;
+    top: calc(var(--y) * 1%);
+    left: calc(var(--x) * 1%);
+}
+
+.sparkle-4 {
+    --x: 75;
+    --y: 60;
+    --s: 0.9;
+    --d: 2;
+    --delay-step: 0.15;
+    top: calc(var(--y) * 1%);
+    left: calc(var(--x) * 1%);
+}
+
+.sparkle-5 {
+    --x: 100;
+    --y: 30;
+    --s: 0.8;
+    --d: 4;
+    --delay-step: 0.15;
+    top: calc(var(--y) * 1%);
+    left: calc(var(--x) * 1%);
+}

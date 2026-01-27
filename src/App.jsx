@@ -62,7 +62,7 @@ function App() {
       </div>
 
       {/* Content Layer */}
-      <div className="container animate-fade-in" style={{ padding: '4rem 1rem', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+      <div className="container animate-fade-in" style={{ padding: '4rem 1rem', textAlign: 'center', position: 'relative', zIndex: 1, maxWidth: status === 'preview' ? '100%' : '800px' }}>
         <header style={{ marginBottom: '3rem' }}>
 
           <h1 style={{ fontSize: '4rem', margin: '0 0 1rem 0', lineHeight: 1.2, color: '#ffffff' }}>
@@ -104,12 +104,12 @@ function App() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'center' }}>
             <span>© {new Date().getFullYear()} Report-maker.ai.</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              Developed by Manikandan
+              Developed by <span style={{ color: '#3b82f6', fontWeight: '600' }}>Manikandan</span>
               <a
                 href="https://www.linkedin.com/in/manikandan-d-246972395/"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: 'inherit', display: 'flex', alignItems: 'center' }}
+                style={{ color: '#3b82f6', display: 'flex', alignItems: 'center' }}
                 aria-label="LinkedIn Profile"
               >
                 <Linkedin size={16} />
@@ -118,7 +118,7 @@ function App() {
                 href="https://github.com/mani6368"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: 'inherit', display: 'flex', alignItems: 'center' }}
+                style={{ color: '#3b82f6', display: 'flex', alignItems: 'center' }}
                 aria-label="GitHub Profile"
               >
                 <Github size={16} />

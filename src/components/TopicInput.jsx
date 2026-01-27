@@ -44,8 +44,8 @@ const TopicInput = ({ onGenerate, isLoading }) => {
                         onChange={(e) => setApiKey(e.target.value)}
                         disabled={isLoading}
                     />
-                    <div style={{ fontSize: '0.8rem', marginTop: '0.4rem', color: 'white' }}>
-                        Don't have one? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent-primary)' }}>Get it here</a> (Free)
+                    <div style={{ fontSize: '0.8rem', marginTop: '0.4rem', color: 'var(--color-accent-primary)' }}>
+                        Don't have one? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: 'white' }}>Get it here</a> <span style={{ color: 'white' }}>(Free)</span>
                     </div>
                 </div>
 
