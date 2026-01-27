@@ -264,13 +264,18 @@ const ReportPreview = ({ data, onDownload }) => {
 
     return (
         <div className="animate-fade-in" style={{ paddingBottom: '4rem' }}>
+            {/* Disclaimer */}
+            <div style={{ maxWidth: '210mm', margin: '0 auto 1rem', color: '#94a3b8', textAlign: 'center', fontSize: '0.9rem', fontStyle: 'italic', background: 'rgba(0,0,0,0.5)', padding: '0.5rem', borderRadius: '8px' }}>
+                "In this preview, the alignment may appear incorrect; however, the alignment will be correct in the Word document. Kindly review the topics below."
+            </div>
+
             {/* Toolbar */}
             <div className="glass-panel" style={{
                 maxWidth: '210mm', margin: '0 auto 2rem', padding: '1rem',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center'
             }}>
                 <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Print Layout Preview</h3>
-                <button onClick={onDownload} className="btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button onClick={onDownload} className="btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', backgroundColor: '#3b82f6' }}>
                     <FileDown size={18} /> Download Word Doc
                 </button>
             </div>

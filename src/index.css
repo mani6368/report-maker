@@ -4,16 +4,16 @@
 :root {
   --font-main: 'Outfit', sans-serif;
 
-  --color-bg-dark: #0f172a;
+  --color-bg-dark: #000000;
   --color-bg-card: #1e293b;
   --color-text-primary: #f8fafc;
   --color-text-secondary: #94a3b8;
-  --color-accent-primary: #eab308;
-  --color-accent-secondary: #f59e0b;
-  --color-accent-glow: rgba(234, 179, 8, 0.5);
+  --color-accent-primary: #3b82f6;
+  --color-accent-secondary: #2563eb;
+  --color-accent-glow: rgba(59, 130, 246, 0.5);
 
   --gradient-main: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
-  --gradient-bg: radial-gradient(circle at top center, #1e293b 0%, #0f172a 100%);
+  --gradient-bg: #000000;
 
   --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-glow: 0 0 20px var(--color-accent-glow);
@@ -55,8 +55,8 @@ body {
 }
 
 .glass-panel {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   box-shadow: var(--shadow-card);
@@ -97,10 +97,11 @@ body {
 }
 
 input[type="text"],
-input[type="password"] {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
+input[type="password"],
+input[type="number"] {
+  background: #000000 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff !important;
   padding: 0.75rem 1rem;
   border-radius: 8px;
   width: 100%;

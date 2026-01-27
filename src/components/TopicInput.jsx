@@ -32,7 +32,7 @@ const TopicInput = ({ onGenerate, isLoading }) => {
 
                 {/* API Key Input */}
                 <div style={{ textAlign: 'left' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'white' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <Key size={16} /> AI API Key
                         </div>
@@ -44,13 +44,13 @@ const TopicInput = ({ onGenerate, isLoading }) => {
                         onChange={(e) => setApiKey(e.target.value)}
                         disabled={isLoading}
                     />
-                    <div style={{ fontSize: '0.8rem', marginTop: '0.4rem', color: 'var(--color-text-secondary)' }}>
+                    <div style={{ fontSize: '0.8rem', marginTop: '0.4rem', color: 'white' }}>
                         Don't have one? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent-primary)' }}>Get it here</a> (Free)
                     </div>
                 </div>
 
                 <div style={{ textAlign: 'left' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'white' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <BookOpen size={16} /> Enter Report Topic or Detailed Prompt
                         </div>
@@ -66,7 +66,7 @@ const TopicInput = ({ onGenerate, isLoading }) => {
                 </div>
 
                 <div style={{ textAlign: 'left' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'white' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <FileText size={16} /> Approx. Number of Pages
                         </div>
