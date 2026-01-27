@@ -74,19 +74,20 @@ function App() {
         </header>
 
         <main>
-          {status === 'idle' || status === 'complete' || status === 'error' ? (
+          {status === 'idle' || status === 'error' ? (
             <div>
-              {status === 'complete' && (
-                <StatusDisplay status={'complete'} message={message} onReset={() => setStatus('idle')} />
-              )}
               {status === 'error' && (
                 <StatusDisplay status={'error'} message={message} />
               )}
 
-              {/* Always show input if idle or complete (below success msg) */}
+              {/* Only show input if idle or error */}
               <TopicInput onGenerate={handleGenerate} isLoading={status === 'generating'} />
             </div>
           ) : null}
+
+          {status === 'complete' && (
+            <StatusDisplay status={'complete'} message={message} onReset={() => setStatus('idle')} />
+          )}
 
           {status === 'generating' && (
             <StatusDisplay status={status} message={message} />

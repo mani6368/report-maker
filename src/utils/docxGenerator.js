@@ -5,8 +5,9 @@ import { saveAs } from "file-saver";
 // --- Helpers for Image Fetching ---
 const fetchImage = async (query) => {
   try {
-    // Use Pollinations.ai for AI-generated visuals matching the topic
-    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(query)}?width=600&height=400&nologo=true`;
+    // Use Pollinations.ai for AI-generated visuals matching the topic with random seed to prevent duplicates
+    const seed = Math.floor(Math.random() * 100000);
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(query)}?width=600&height=400&nologo=true&seed=${seed}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error('Image load failed');
     return await response.arrayBuffer();
@@ -41,7 +42,7 @@ const parseContentWithImages = async (text, createBodyTextFunc, imageMap) => {
               text: `\nFigure: ${query}`,
               bold: true,
               size: 20, // 10pt caption
-              color: "666666"
+              color: "000000"
             })
           ],
           alignment: AlignmentType.CENTER,
