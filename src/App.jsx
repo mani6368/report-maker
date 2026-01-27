@@ -53,7 +53,7 @@ function App() {
           <Sparkles size={32} color="var(--color-accent-primary)" />
         </div>
         <h1 style={{ fontSize: '3rem', margin: '0 0 1rem 0', lineHeight: 1.2 }}>
-          AI Project <span className="text-gradient">Report Maker</span>
+          <span className="text-gradient">Report-maker.ai</span>
         </h1>
         <p style={{ color: 'var(--color-text-secondary)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
           Generate professional college project reports in seconds using AI.
@@ -78,7 +78,7 @@ function App() {
       </main>
 
       <footer style={{ marginTop: '4rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-        <p>© {new Date().getFullYear()} Report Maker. Developed by Manikandan.</p>
+        <p>© {new Date().getFullYear()} Report-maker.ai. Developed by Manikandan.</p>
       </footer>
     </div>
   );
