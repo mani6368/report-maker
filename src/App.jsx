@@ -39,7 +39,7 @@ function App() {
     if (!reportData) return;
     try {
       await generateDocx(reportData);
-      setStatus('complete'); // Optional: keep it in preview or show success
+      setStatus('complete');
     } catch (err) {
       console.error(err);
       alert("Failed to create document");
@@ -56,14 +56,23 @@ function App() {
           <span className="text-gradient">Report-maker.ai</span>
         </h1>
         <p style={{ color: 'var(--color-text-secondary)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
-          Generate professional college project reports in seconds using AI.
-          Just enter your topic and let the magic happen.
+          Created for Reduce the Time for Student
         </p>
       </header>
 
       <main>
         {status === 'idle' || status === 'complete' || status === 'error' ? (
-          <TopicInput onGenerate={handleGenerate} isLoading={status === 'generating'} />
+          <div>
+            {status === 'complete' && (
+              <StatusDisplay status={'complete'} message={message} onReset={() => setStatus('idle')} />
+            )}
+            {status === 'error' && (
+              <StatusDisplay status={'error'} message={message} />
+            )}
+
+            {/* Always show input if idle or complete (below success msg) */}
+            <TopicInput onGenerate={handleGenerate} isLoading={status === 'generating'} />
+          </div>
         ) : null}
 
         {status === 'generating' && (
@@ -74,7 +83,7 @@ function App() {
           <ReportPreview data={reportData} onDownload={handleDownload} />
         )}
 
-        <StatusDisplay status={status === 'complete' || status === 'error' ? status : 'idle'} message={message} />
+
       </main>
 
       <footer style={{ marginTop: '4rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>

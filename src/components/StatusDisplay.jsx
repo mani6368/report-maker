@@ -1,6 +1,6 @@
 import { Loader2, CheckCircle, FileText } from 'lucide-react';
 
-const StatusDisplay = ({ status, message }) => {
+const StatusDisplay = ({ status, message, onReset }) => {
     if (status === 'idle') return null;
 
     return (
@@ -16,15 +16,18 @@ const StatusDisplay = ({ status, message }) => {
                 </div>
             ) : null}
 
-            {status === 'complete' && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                    <CheckCircle size={48} color="#22c55e" />
-                    <div>
-                        <h3 style={{ margin: '0 0 0.5rem 0' }}>Success!</h3>
-                        <p style={{ margin: 0, color: 'var(--color-text-secondary)' }}>Your report has been generated and downloaded.</p>
-                    </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                <CheckCircle size={48} color="#22c55e" />
+                <div>
+                    <h3 style={{ margin: '0 0 0.5rem 0' }}>Success!</h3>
+                    <p style={{ margin: 0, color: 'var(--color-text-secondary)' }}>Your report has been generated and downloaded.</p>
                 </div>
-            )}
+                {onReset && (
+                    <button onClick={onReset} className="btn-primary" style={{ marginTop: '1rem', background: 'var(--color-bg-card)', border: '1px solid var(--color-accent-primary)', color: 'var(--color-text-primary)' }}>
+                        Generate Another Report
+                    </button>
+                )}
+            </div>
 
             {status === 'error' && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
