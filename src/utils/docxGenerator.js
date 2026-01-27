@@ -16,7 +16,7 @@ const fetchImage = async (query) => {
   }
 };
 
-const parseContentWithImages = async (text, createBodyTextFunc) => {
+const parseContentWithImages = async (text, createBodyTextFunc, imageMap) => {
   const paragraphs = [];
   // Split by [IMAGE:Query] tags
   const parts = text.split(/(\[IMAGE:.*?\])/g);
@@ -24,8 +24,11 @@ const parseContentWithImages = async (text, createBodyTextFunc) => {
   for (const part of parts) {
     const imageMatch = part.match(/^\[IMAGE:(.*?)\]$/);
     if (imageMatch) {
+      const tag = imageMatch[0]; // Full tag [IMAGE:...]
       const query = imageMatch[1].trim();
-      const imageBuffer = await fetchImage(query);
+
+      // Use pre-fetched image if available, else try fetch (fallback)
+      const imageBuffer = imageMap?.[tag] || await fetchImage(query);
 
       if (imageBuffer) {
         paragraphs.push(new Paragraph({
@@ -56,7 +59,7 @@ const parseContentWithImages = async (text, createBodyTextFunc) => {
 
 // --- Main Generator ---
 export const generateDocx = async (data) => {
-  const { title, abstract, chapters, references } = data;
+  const { title, abstract, chapters, references, images } = data; // Destructure images
 
   // Constants
   const BLACK_COLOR = "000000";
@@ -169,7 +172,7 @@ export const generateDocx = async (data) => {
 
     // Content
     if (chapter.content) {
-      const introParas = await parseContentWithImages(chapter.content, createBodyText);
+      const introParas = await parseContentWithImages(chapter.content, createBodyText, images);
       docSections.push(...introParas);
     }
 
@@ -179,7 +182,7 @@ export const generateDocx = async (data) => {
       docSections.push(createSubHeading(`${chapter.number}.${(chapter.subsections.indexOf(sub) + 1)} ${cleanTitle}:`));
 
       if (sub.content) {
-        const subParas = await parseContentWithImages(sub.content, createBodyText);
+        const subParas = await parseContentWithImages(sub.content, createBodyText, images);
         docSections.push(...subParas);
       }
     }

@@ -169,8 +169,49 @@ export const fetchReportContent = async (topic, apiKey, pageCount = 20) => {
     }
   }
 
+  // Step 3: PRE-FETCH IMAGES (Performance Optimization)
+  console.log("Pre-fetching images...");
+  const imageMap = {};
+  const imagePromises = [];
+
+  const extractAndFetch = (text) => {
+    if (!text) return;
+    const matches = text.match(/\[IMAGE:(.*?)\]/g);
+    if (matches) {
+      matches.forEach(tag => {
+        const query = tag.replace('[IMAGE:', '').replace(']', '').trim();
+        if (!imageMap[tag]) {
+          // Initiate fetch
+          const promise = (async () => {
+            try {
+              const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(query)}?width=600&height=400&nologo=true`;
+              const response = await fetch(url);
+              if (response.ok) {
+                const buffer = await response.arrayBuffer();
+                imageMap[tag] = buffer;
+              }
+            } catch (e) {
+              console.warn(`Failed to pre-fetch image: ${query}`, e);
+            }
+          })();
+          imagePromises.push(promise);
+        }
+      });
+    }
+  };
+
+  fullChapters.forEach(ch => {
+    extractAndFetch(ch.content);
+    ch.subsections?.forEach(sub => extractAndFetch(sub.content));
+  });
+
+  if (imagePromises.length > 0) {
+    await Promise.allSettled(imagePromises);
+  }
+
   return {
     ...outline,
-    chapters: fullChapters
+    chapters: fullChapters,
+    images: imageMap
   };
 };

@@ -16,7 +16,7 @@ function App() {
 
   const handleGenerate = async (topic, pageCount, apiKey) => {
     setStatus('generating');
-    setMessage(`Researching "${topic}" with Gemini...`);
+    setMessage(`Our AI is writing your report...`);
     setReportData(null);
 
     try {
