@@ -6,14 +6,13 @@ import { saveAs } from "file-saver";
 const fetchImage = async (query) => {
   try {
     // Use Pollinations.ai for AI-generated visuals matching the topic
-    // Adding conservative size 
     const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(query)}?width=600&height=400&nologo=true`;
     const response = await fetch(url);
     if (!response.ok) throw new Error('Image load failed');
     return await response.arrayBuffer();
   } catch (e) {
     console.warn("Failed to fetch image for:", query, e);
-    return null; // Graceful fallback (just skip image)
+    return null; // Graceful fallback
   }
 };
 
@@ -47,8 +46,9 @@ const parseContentWithImages = async (text, createBodyTextFunc) => {
         }));
       }
     } else if (part.trim()) {
-      // Standard Text
-      paragraphs.push(createBodyTextFunc(part));
+      // Standard Text - split by newlines for paragraphs
+      const lines = part.split('\n').filter(l => l.trim());
+      lines.forEach(line => paragraphs.push(createBodyTextFunc(line)));
     }
   }
   return paragraphs;
@@ -167,7 +167,7 @@ export const generateDocx = async (data) => {
     // Title
     docSections.push(createChapterTitle(chapter.number, chapter.title));
 
-    // Content with Images?
+    // Content
     if (chapter.content) {
       const introParas = await parseContentWithImages(chapter.content, createBodyText);
       docSections.push(...introParas);

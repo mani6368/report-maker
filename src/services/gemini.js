@@ -78,8 +78,8 @@ export const fetchReportContent = async (topic, apiKey, pageCount = 20) => {
   const contentPages = Math.max(1, pageCount - reservedPages);
 
   // Calculate total words needed for the content chapters
-  // REDUCED MULTIPLIER: 250 words/page to be safe and avoid overshooting (since headings/spacing take space)
-  const totalWords = contentPages * 250;
+  // OPTIMIZED: 180 words/page based on user feedback (33 pages vs 25 requested). 14pt double spaced takes lot of room.
+  const totalWords = contentPages * 180;
 
   const wordsPerChapter = Math.round(totalWords / (outline.chapters.length || 5));
 
