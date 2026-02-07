@@ -303,14 +303,14 @@ function App() {
         transition: 'left 0.3s ease, width 0.3s ease',
         zIndex: 1,
         // [MO] extra top padding for mobile to clear nav bar
-        padding: isMobile ? '6rem 0.5rem 1rem' : '2rem',
+        padding: isMobile ? '6rem 1rem 1rem' : '2rem',
         boxSizing: 'border-box',
         overflowY: 'auto', // Enable vertical scrolling for the entire content area
         overflowX: 'hidden' // Prevent horizontal scroll
       }}>
         <header style={{ textAlign: 'center', paddingTop: isMobile ? '0' : '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
           <h1 style={{
-            fontSize: isMobile ? '2.5rem' : '4rem',
+            fontSize: isMobile ? '2.0rem' : '4rem',
             margin: '0',
             lineHeight: 1.2,
             color: '#ffffff',
