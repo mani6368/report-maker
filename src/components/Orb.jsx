@@ -7,7 +7,8 @@ export default function Orb({
   hoverIntensity = 0.2,
   rotateOnHover = true,
   forceHoverState = false,
-  backgroundColor = '#000000'
+  backgroundColor = '#000000',
+  baseColor = '#1a66e6' // Default blue-ish
 }) {
   const ctnDom = useRef(null);
 
@@ -32,6 +33,7 @@ export default function Orb({
     uniform float rot;
     uniform float hoverIntensity;
     uniform vec3 backgroundColor;
+    uniform vec3 uBaseColor;
     varying vec2 vUv;
 
     vec3 rgb2yiq(vec3 c) {
@@ -101,9 +103,8 @@ export default function Orb({
       return vec4(colorIn.rgb / (a + 1e-5), a);
     }
 
-    const vec3 baseColor1 = vec3(0.1, 0.4, 0.9);
-    const vec3 baseColor2 = vec3(0.0, 0.1, 0.3);
-    const vec3 baseColor3 = vec3(0.0, 0.0, 0.1);
+    // Dynamic base colors derived from uniform
+    // const vec3 baseColor1 = vec3(0.1, 0.4, 0.9); // Old hardcoded
     const float innerRadius = 0.6;
     const float noiseScale = 0.65;
 
@@ -115,6 +116,12 @@ export default function Orb({
     }
 
     vec4 draw(vec2 uv) {
+      // Use uBaseColor for the main color
+      // Derive darker variants for depth
+      vec3 baseColor1 = uBaseColor;
+      vec3 baseColor2 = uBaseColor * 0.3; // Darker
+      vec3 baseColor3 = uBaseColor * 0.1; // Darkest
+
       vec3 color1 = adjustHue(baseColor1, hue);
       vec3 color2 = adjustHue(baseColor2, hue);
       vec3 color3 = adjustHue(baseColor3, hue);
@@ -205,7 +212,8 @@ export default function Orb({
         hover: { value: 0 },
         rot: { value: 0 },
         hoverIntensity: { value: hoverIntensity },
-        backgroundColor: { value: hexToVec3(backgroundColor) }
+        backgroundColor: { value: hexToVec3(backgroundColor) },
+        uBaseColor: { value: hexToVec3(baseColor) } // Pass baseColor uniform
       }
     });
 
@@ -264,6 +272,7 @@ export default function Orb({
       program.uniforms.hue.value = hue;
       program.uniforms.hoverIntensity.value = hoverIntensity;
       program.uniforms.backgroundColor.value = hexToVec3(backgroundColor);
+      program.uniforms.uBaseColor.value = hexToVec3(baseColor); // Update uniform value
 
       const effectiveHover = forceHoverState ? 1 : targetHover;
       program.uniforms.hover.value += (effectiveHover - program.uniforms.hover.value) * 0.1;
@@ -286,7 +295,7 @@ export default function Orb({
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hue, hoverIntensity, rotateOnHover, forceHoverState, backgroundColor]);
+  }, [hue, hoverIntensity, rotateOnHover, forceHoverState, backgroundColor, baseColor]);
 
   return <div ref={ctnDom} className="orb-container" />;
 }

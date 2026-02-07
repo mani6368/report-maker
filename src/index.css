@@ -8,9 +8,9 @@
   --color-bg-card: #1e293b;
   --color-text-primary: #f8fafc;
   --color-text-secondary: #94a3b8;
-  --color-accent-primary: #3b82f6;
+  --color-accent-primary: #e25a83;
   --color-accent-secondary: #2563eb;
-  --color-accent-glow: rgba(59, 130, 246, 0.5);
+  --color-accent-glow: rgba(226, 90, 131, 0.5);
 
   --gradient-main: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
   --gradient-bg: #000000;
@@ -37,6 +37,37 @@ body {
   min-height: 100vh;
 }
 
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(226, 90, 131, 0.6), rgba(37, 99, 235, 0.6));
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(226, 90, 131, 0.9), rgba(37, 99, 235, 0.9));
+  background-clip: padding-box;
+}
+
+/* Firefox Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(226, 90, 131, 0.6) rgba(0, 0, 0, 0.3);
+}
+
+
 /* Animations */
 @keyframes fadeIn {
   from {
@@ -54,12 +85,24 @@ body {
   animation: fadeIn 0.6s ease-out forwards;
 }
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .glass-panel {
-  background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(5px);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  box-shadow: var(--shadow-card);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  padding: 2rem;
 }
 
 /* Utilities */
@@ -132,13 +175,21 @@ input:focus {
 .a4-page {
   width: 210mm;
   min-height: 297mm;
+  /* A4 Height */
   padding: 2.54cm;
   /* 1 inch margin */
-  margin: 2rem auto;
-  background: white;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  color: black;
-  /* Default text black */
+  margin: 0 auto;
+  box-sizing: border-box;
+  /* Ensure padding doesn't expand width */
+  /* Removed vertical margin for continuous flow */
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  /* Changed to glassmorphism for preview */
+  box-shadow: none;
+  /* Removed shadow for seamless pages */
+  color: white;
+  /* Changed to white for preview */
   font-family: "Times New Roman", serif;
   font-size: 14pt;
   line-height: 1.15;
@@ -146,6 +197,8 @@ input:focus {
   position: relative;
   display: flex;
   flex-direction: column;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  /* Subtle separator between pages */
 }
 
 /* Page Footer for Numbers */
@@ -156,9 +209,11 @@ input:focus {
   text-align: center;
   font-size: 12pt;
   width: 100%;
+  color: white;
+  /* White for preview */
 }
 
-/* Headings - STRICTLY BLACK and Uppercase */
+/* Headings - WHITE for preview, but Word doc stays black */
 .chapter-title {
   text-align: center;
   text-transform: uppercase;
@@ -166,7 +221,8 @@ input:focus {
   font-size: 16pt;
   margin-top: 2rem;
   margin-bottom: 2rem;
-  color: black !important;
+  color: white !important;
+  /* Changed to white for preview */
 }
 
 .section-title {
@@ -174,7 +230,8 @@ input:focus {
   font-size: 14pt;
   margin-top: 1.5rem;
   margin-bottom: 1rem;
-  color: black !important;
+  color: white !important;
+  /* Changed to white for preview */
 }
 
 /* Paragraph Formatting */
@@ -194,7 +251,8 @@ input:focus {
   display: grid;
   grid-template-columns: 1fr 4fr 1fr;
   font-weight: bold;
-  border-bottom: 2px solid black;
+  border-bottom: 2px solid white;
+  /* Changed to white for preview */
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
   text-align: center;
@@ -220,6 +278,27 @@ input:focus {
   text-align: left;
 }
 
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+  .glass-panel {
+    max-width: 100% !important;
+    padding: 0.75rem !important;
+    border-radius: 12px;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="number"] {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  .btn-primary {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
 /* Print Media Query */
 @media print {
 
@@ -241,4 +320,73 @@ input:focus {
     background: white;
   }
 
+}
+
+/* PDF Export Overrides - Applied during html2pdf generation */
+.pdf-export .a4-page {
+  color: black !important;
+  background: white !important;
+  box-shadow: none !important;
+  margin: 0 auto !important;
+  border: none !important;
+}
+
+.pdf-export .page-footer {
+  color: black !important;
+}
+
+.pdf-export .chapter-title,
+.pdf-export .section-title,
+.pdf-export h1,
+.pdf-export h2,
+.pdf-export h3,
+.pdf-export h4,
+.pdf-export h5,
+.pdf-export h6,
+.pdf-export p,
+.pdf-export li,
+.pdf-export td,
+.pdf-export th,
+.pdf-export span,
+.pdf-export div,
+.pdf-export strong,
+.pdf-export b {
+  color: black !important;
+}
+
+.pdf-export table {
+  border-color: black !important;
+}
+
+.pdf-export tr {
+  border-color: black !important;
+}
+
+
+/* Shine Effect for Feedback Button */
+@keyframes shine-loop {
+  0% {
+    background-position: 200% center;
+  }
+
+  100% {
+    background-position: -200% center;
+  }
+}
+
+.shine-feedback-btn {
+  background: linear-gradient(120deg,
+      rgba(255, 255, 255, 0.05) 40%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0.05) 60%);
+  background-size: 200% auto;
+  animation: shine-loop 3s linear infinite;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.shine-feedback-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+  color: #fff !important;
 }

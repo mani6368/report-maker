@@ -1,9 +1,9 @@
 /* SparkleButton.css */
 .sparkle-btn-container {
     /* Scoped variables for the button */
-    --btn-color: #3b82f6;
-    /* Blue to match theme */
-    --btn-shadow: rgba(59, 130, 246, 0.4);
+    --btn-color: #e25a83;
+    /* Pink to match theme */
+    --btn-shadow: rgba(226, 90, 131, 0.4);
     --btn-glare: rgba(255, 255, 255, 0.75);
     --btn-font-size: 1rem;
     --btn-padding: 0.75rem 1.5rem;

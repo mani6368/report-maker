@@ -1,0 +1,270 @@
+.login-wrapper {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #000;
+    /* Fallback/Base background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+}
+
+.orb-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+.login-content {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    /* max-width removed to allow header to expand */
+    padding: 20px;
+    margin-top: 12vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.glass-card {
+    width: 100%;
+    max-width: 420px;
+    /* Restrict card width here */
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    color: white;
+    transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+}
+
+.glass-card.exiting {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+    pointer-events: none;
+}
+
+.card-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.card-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    background: linear-gradient(135deg, #fff 0%, #b3b3b3 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.card-header p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    margin: 0;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.4);
+    pointer-events: none;
+}
+
+.input-group input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 14px 16px 14px 44px;
+    color: white;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.input-group input:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+}
+
+.input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.submit-btn {
+    width: 100%;
+    background: #e25a83;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-top: 10px;
+}
+
+.submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(226, 90, 131, 0.4);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+.card-footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.card-footer span {
+    color: #e25a83;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: opacity 0.2s;
+}
+
+.card-footer span:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    width: auto;
+    /* Ensure it doesn't take full width */
+}
+
+.password-toggle:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Login Header Styles */
+.login-header {
+    position: absolute;
+    top: 3%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 1000;
+    width: 100%;
+}
+
+.login-logo {
+    width: 100px;
+    height: auto;
+}
+
+.login-title {
+    font-size: 3rem;
+    margin: 0;
+    line-height: 1.2;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+    .login-header {
+        flex-direction: row;
+        /* Row layout: Logo Left, Text Right */
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        /* Closer gap */
+        top: 5%;
+    }
+
+    .login-logo {
+        width: 32px;
+        /* Smaller logo */
+    }
+
+    .login-title {
+        font-size: 1.4rem;
+        /* Smaller title */
+        white-space: nowrap;
+    }
+
+    .login-content {
+        margin-top: 15vh;
+        padding: 15px;
+        /* Reduce container padding */
+    }
+
+    /* Make login box smaller/compact on mobile */
+    .glass-card {
+        padding: 25px 20px;
+        /* Reduced padding (was 40px) */
+        max-width: 100%;
+        border-radius: 16px;
+        /* Slightly smaller radius */
+    }
+
+    .card-header h2 {
+        font-size: 24px;
+        /* Smaller header inside card */
+        margin-bottom: 5px;
+    }
+
+    .input-group {
+        margin-bottom: 15px;
+        /* Tighter spacing */
+    }
+
+    .input-group input {
+        padding: 12px 16px 12px 40px;
+        /* Slightly smaller inputs */
+        font-size: 14px;
+    }
+
+    .submit-btn {
+        padding: 12px;
+        font-size: 15px;
+    }
+}
