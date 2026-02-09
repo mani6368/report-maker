@@ -6,16 +6,11 @@ import mammoth from 'mammoth';
 // Set worker source for pdfjs
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
-const TopicInput = ({ onGenerate, isLoading, errorMessage = '', isMobile = false }) => {
+const TopicInput = ({ onGenerate, isLoading, errorMessage = '' }) => {
     const [topic, setTopic] = useState('');
     const [pageCount, setPageCount] = useState(20);
-    const [imageCount] = useState(0); // Images disabled - set to 0
     const [apiKey, setApiKey] = useState('');
     const [error, setError] = useState('');
-
-    // Font Size State
-    const [contentFontSize, setContentFontSize] = useState(14); // Default 14pt
-    const [chapterFontSize, setChapterFontSize] = useState(16); // Default 16pt
 
     // File Upload State
     const [file, setFile] = useState(null);
@@ -105,19 +100,19 @@ const TopicInput = ({ onGenerate, isLoading, errorMessage = '', isMobile = false
         }
 
         setError('');
-        // Pass all parameters including font sizes
-        onGenerate(topic, pageCount, apiKey, extractedText, imageCount, contentFontSize, chapterFontSize);
+        // Pass extractedText as the 4th argument (we'll need to update App.jsx signature)
+        onGenerate(topic, pageCount, apiKey, extractedText);
     };
 
     return (
-        <div className="glass-panel" style={{ maxWidth: '600px', margin: '0 auto', width: '100%' }}>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '1rem' : '1.5rem' }}>
+        <div className="glass-panel topic-input-wrapper">
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
                 {/* API Key Input */}
-                <div style={{ textAlign: 'left' }}>
-                    <label style={{ display: 'block', marginBottom: isMobile ? '0.35rem' : '0.5rem', fontSize: isMobile ? '0.8rem' : '1.1rem', color: 'white' }}>
+                <div className="input-group">
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'white' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Key size={isMobile ? 14 : 18} /> AI API Key
+                            <Key size={16} /> AI API Key
                         </div>
                     </label>
                     <input
@@ -127,7 +122,7 @@ const TopicInput = ({ onGenerate, isLoading, errorMessage = '', isMobile = false
                         onChange={(e) => setApiKey(e.target.value)}
                         disabled={isLoading}
                     />
-                    <div style={{ fontSize: isMobile ? '0.7rem' : '0.9rem', marginTop: '0.4rem', color: 'var(--color-accent-primary)' }}>
+                    <div style={{ fontSize: '0.8rem', marginTop: '0.4rem', color: 'var(--color-accent-primary)' }}>
                         Don't have one? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: 'white' }}>Get it here</a> <span style={{ color: 'white' }}>(Free)</span>
                     </div>
                     {/* Show API key error inline */}
@@ -147,10 +142,10 @@ const TopicInput = ({ onGenerate, isLoading, errorMessage = '', isMobile = false
                 </div>
 
                 {/* FILE UPLOAD SECTION */}
-                <div style={{ textAlign: 'left' }}>
-                    <label style={{ display: 'block', marginBottom: isMobile ? '0.35rem' : '0.5rem', fontSize: isMobile ? '0.8rem' : '1.1rem', color: 'white' }}>
+                <div className="input-group">
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'white' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Upload size={isMobile ? 14 : 18} /> Upload Reference Report (Optional)
+                            <Upload size={16} /> Upload Reference Report (Optional)
                         </div>
                     </label>
 
@@ -177,10 +172,10 @@ const TopicInput = ({ onGenerate, isLoading, errorMessage = '', isMobile = false
                                 style={{ display: 'none' }}
                                 disabled={isLoading}
                             />
-                            <p style={{ margin: 0, fontSize: isMobile ? '0.8rem' : '0.9rem', color: 'rgba(255,255,255,0.7)' }}>
+                            <p style={{ margin: 0, fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>
                                 Click to upload PDF, DOCX, or TXT
                             </p>
-                            <p style={{ margin: '0.2rem 0 0', fontSize: isMobile ? '0.7rem' : '0.75rem', color: 'rgba(255,255,255,0.5)' }}>
+                            <p style={{ margin: '0.2rem 0 0', fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>
                                 We'll analyze it to match the style & content.
                             </p>
                         </div>
@@ -235,10 +230,10 @@ const TopicInput = ({ onGenerate, isLoading, errorMessage = '', isMobile = false
                     )}
                 </div>
 
-                <div style={{ textAlign: 'left' }}>
-                    <label style={{ display: 'block', marginBottom: isMobile ? '0.35rem' : '0.5rem', fontSize: isMobile ? '0.8rem' : '1.1rem', color: 'white' }}>
+                <div className="input-group">
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'white' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <BookOpen size={isMobile ? 14 : 18} /> Enter Report Topic or Detailed Prompt
+                            <BookOpen size={16} /> Enter Report Topic or Detailed Prompt
                         </div>
                     </label>
                     <input
@@ -250,10 +245,10 @@ const TopicInput = ({ onGenerate, isLoading, errorMessage = '', isMobile = false
                     />
                 </div>
 
-                <div style={{ textAlign: 'left' }}>
-                    <label style={{ display: 'block', marginBottom: isMobile ? '0.35rem' : '0.5rem', fontSize: isMobile ? '0.8rem' : '1.1rem', color: 'white' }}>
+                <div className="input-group">
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'white' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <FileText size={isMobile ? 14 : 18} /> Approx. Number of Pages
+                            <FileText size={16} /> Approx. Number of Pages
                         </div>
                     </label>
                     <input
@@ -266,85 +261,6 @@ const TopicInput = ({ onGenerate, isLoading, errorMessage = '', isMobile = false
                     />
                 </div>
 
-
-                {/* Content Font Size Section */}
-                <div style={{ textAlign: 'left' }}>
-                    <label style={{ display: 'block', marginBottom: isMobile ? '0.35rem' : '0.5rem', fontSize: isMobile ? '0.8rem' : '1.1rem', color: 'white' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <FileText size={isMobile ? 14 : 18} /> Content Font Size (10-18pt)
-                        </div>
-                    </label>
-                    <input
-                        type="number"
-                        min="10"
-                        max="18"
-                        value={contentFontSize}
-                        onChange={(e) => {
-                            const val = e.target.value;
-                            if (val === '') {
-                                setContentFontSize('');
-                            } else {
-                                const num = parseInt(val);
-                                if (!isNaN(num)) {
-                                    setContentFontSize(num);
-                                }
-                            }
-                        }}
-                        onBlur={(e) => {
-                            const val = e.target.value;
-                            if (val === '' || parseInt(val) < 10) {
-                                setContentFontSize(14);
-                            } else if (parseInt(val) > 18) {
-                                setContentFontSize(18);
-                            }
-                        }}
-                        disabled={isLoading}
-                        placeholder="14"
-                    />
-                    <div style={{ fontSize: isMobile ? '0.7rem' : '0.8rem', marginTop: '0.3rem', color: 'rgba(255,255,255,0.5)' }}>
-                        Default: 14pt - Sets the font size for all content text
-                    </div>
-                </div>
-
-                {/* Chapter Font Size Section */}
-                <div style={{ textAlign: 'left' }}>
-                    <label style={{ display: 'block', marginBottom: isMobile ? '0.35rem' : '0.5rem', fontSize: isMobile ? '0.8rem' : '1.1rem', color: 'white' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <BookOpen size={isMobile ? 14 : 18} /> Chapter Title Font Size (12-20pt)
-                        </div>
-                    </label>
-                    <input
-                        type="number"
-                        min="12"
-                        max="20"
-                        value={chapterFontSize}
-                        onChange={(e) => {
-                            const val = e.target.value;
-                            if (val === '') {
-                                setChapterFontSize('');
-                            } else {
-                                const num = parseInt(val);
-                                if (!isNaN(num)) {
-                                    setChapterFontSize(num);
-                                }
-                            }
-                        }}
-                        onBlur={(e) => {
-                            const val = e.target.value;
-                            if (val === '' || parseInt(val) < 12) {
-                                setChapterFontSize(16);
-                            } else if (parseInt(val) > 20) {
-                                setChapterFontSize(20);
-                            }
-                        }}
-                        disabled={isLoading}
-                        placeholder="16"
-                    />
-                    <div style={{ fontSize: isMobile ? '0.7rem' : '0.8rem', marginTop: '0.3rem', color: 'rgba(255,255,255,0.5)' }}>
-                        Default: 16pt - Sets the font size for chapter titles
-                    </div>
-                </div>
-
                 {error && (
                     <div style={{ color: '#ef4444', fontSize: '0.9rem', background: 'rgba(239, 68, 68, 0.1)', padding: '0.5rem', borderRadius: '4px' }}>
                         {error}
@@ -355,7 +271,7 @@ const TopicInput = ({ onGenerate, isLoading, errorMessage = '', isMobile = false
                     type="submit"
                     className="btn-primary"
                     disabled={isLoading || isProcessingFile}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: isMobile ? '1rem' : '1.1rem' }}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                 >
                     {isLoading ? 'Generating...' : (
                         <>

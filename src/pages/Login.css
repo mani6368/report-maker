@@ -1,16 +1,14 @@
 .login-wrapper {
     position: relative;
-    width: 100%;
-    min-height: 100vh;
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
     background-color: #000;
+    /* Fallback/Base background */
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     font-family: 'Inter', sans-serif;
-    padding: 20px;
-    box-sizing: border-box;
 }
 
 .orb-background {
@@ -23,46 +21,22 @@
     pointer-events: auto;
 }
 
-.login-header {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.login-logo {
-    width: 80px;
-    height: auto;
-    filter: drop-shadow(0 0 10px rgba(226, 90, 131, 0.5));
-}
-
-.login-title {
-    font-size: 3rem;
-    margin: 0;
-    line-height: 1.2;
-    color: #ffffff;
-    font-weight: bold;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-}
-
 .login-content {
     position: relative;
     z-index: 10;
     width: 100%;
-    max-width: 420px;
+    /* max-width removed to allow header to expand */
+    padding: 20px;
+    margin-top: 12vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 0;
-    padding: 0;
 }
 
 .glass-card {
     width: 100%;
+    max-width: 420px;
+    /* Restrict card width here */
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -71,12 +45,12 @@
     padding: 40px;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     color: white;
-    transition: opacity 0.5s ease;
+    transition: opacity 1s ease-in-out, transform 1s ease-in-out;
 }
 
 .glass-card.exiting {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.95) translateY(20px);
     pointer-events: none;
 }
 
@@ -200,37 +174,97 @@
     justify-content: center;
     transition: color 0.2s;
     width: auto;
+    /* Ensure it doesn't take full width */
 }
 
 .password-toggle:hover {
     color: rgba(255, 255, 255, 0.8);
 }
 
+/* Login Header Styles */
+.login-header {
+    position: absolute;
+    top: 3%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 1000;
+    width: 100%;
+}
+
+.login-logo {
+    width: 100px;
+    height: auto;
+}
+
+.login-title {
+    font-size: 3rem;
+    margin: 0;
+    line-height: 1.2;
+    color: #ffffff;
+    font-weight: bold;
+}
+
 /* Mobile Responsive Adjustments */
 @media (max-width: 768px) {
-    .login-wrapper {
-        justify-content: center;
-        /* Keep centered on mobile too */
-        padding: 15px;
-    }
-
     .login-header {
-        margin-bottom: 1.5rem;
+        flex-direction: row;
+        /* Row layout: Logo Left, Text Right */
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        /* Closer gap */
+        top: 5%;
     }
 
     .login-logo {
-        width: 60px;
+        width: 32px;
+        /* Smaller logo */
     }
 
     .login-title {
-        font-size: 2rem;
+        font-size: 1.4rem;
+        /* Smaller title */
+        white-space: nowrap;
     }
 
+    .login-content {
+        margin-top: 15vh;
+        padding: 15px;
+        /* Reduce container padding */
+    }
+
+    /* Make login box smaller/compact on mobile */
     .glass-card {
-        padding: 30px 20px;
+        padding: 25px 20px;
+        /* Reduced padding (was 40px) */
+        max-width: 100%;
+        border-radius: 16px;
+        /* Slightly smaller radius */
     }
 
     .card-header h2 {
         font-size: 24px;
+        /* Smaller header inside card */
+        margin-bottom: 5px;
+    }
+
+    .input-group {
+        margin-bottom: 15px;
+        /* Tighter spacing */
+    }
+
+    .input-group input {
+        padding: 12px 16px 12px 40px;
+        /* Slightly smaller inputs */
+        font-size: 14px;
+    }
+
+    .submit-btn {
+        padding: 12px;
+        font-size: 15px;
     }
 }

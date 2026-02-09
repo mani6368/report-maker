@@ -19,15 +19,6 @@
   --shadow-glow: 0 0 20px var(--color-accent-glow);
 }
 
-/* Global Box Sizing */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(226, 90, 131, 0.6) rgba(0, 0, 0, 0.3);
-}
-
 body {
   margin: 0;
   font-family: var(--font-main);
@@ -37,11 +28,14 @@ body {
   /* Parallax-like effect */
   color: var(--color-text-primary);
   min-height: 100vh;
-  overflow-x: hidden;
-  /* Prevent horizontal scroll */
   -webkit-font-smoothing: antialiased;
 }
 
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
 /* Animations */
 @keyframes fadeIn {
@@ -60,16 +54,6 @@ body {
   animation: fadeIn 0.6s ease-out forwards;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .glass-panel {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(15px);
@@ -77,7 +61,6 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 24px;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  padding: 2rem;
 }
 
 /* Utilities */
@@ -149,18 +132,13 @@ input:focus {
 /* A4 Page Simulation */
 .a4-page {
   width: 210mm;
-  min-height: 297mm;
-  /* A4 Height */
+  /* min-height removed - let content determine height */
   padding: 2.54cm;
   /* 1 inch margin */
   margin: 0 auto;
-  box-sizing: border-box;
-  /* Ensure padding doesn't expand width */
   /* Removed vertical margin for continuous flow */
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  /* Changed to glassmorphism for preview */
+  background: #000000;
+  /* Changed to black for preview */
   box-shadow: none;
   /* Removed shadow for seamless pages */
   color: white;
@@ -172,7 +150,7 @@ input:focus {
   position: relative;
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid #333;
   /* Subtle separator between pages */
 }
 
@@ -253,24 +231,33 @@ input:focus {
   text-align: left;
 }
 
-/* Mobile Responsive Adjustments */
+
+/* Mobile Optimizations */
+.topic-input-wrapper {
+  padding: 2rem;
+  max-width: 2000px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.input-group {
+  text-align: left;
+}
+
 @media (max-width: 768px) {
-  .glass-panel {
-    max-width: 100% !important;
-    padding: 0.75rem !important;
-    border-radius: 12px;
+  .topic-input-wrapper {
+    padding: 1rem !important;
   }
 
-  input[type="text"],
-  input[type="password"],
-  input[type="number"] {
-    padding: 0.5rem 0.7rem;
+  .input-group label {
     font-size: 0.85rem;
   }
 
+  /* Force better alignment for potential feedback buttons if they exist globally */
   .btn-primary {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
+    width: 100%;
+    justify-content: center;
+    /* Center content in buttons on mobile */
   }
 }
 
@@ -295,73 +282,4 @@ input:focus {
     background: white;
   }
 
-}
-
-/* PDF Export Overrides - Applied during html2pdf generation */
-.pdf-export .a4-page {
-  color: black !important;
-  background: white !important;
-  box-shadow: none !important;
-  margin: 0 auto !important;
-  border: none !important;
-}
-
-.pdf-export .page-footer {
-  color: black !important;
-}
-
-.pdf-export .chapter-title,
-.pdf-export .section-title,
-.pdf-export h1,
-.pdf-export h2,
-.pdf-export h3,
-.pdf-export h4,
-.pdf-export h5,
-.pdf-export h6,
-.pdf-export p,
-.pdf-export li,
-.pdf-export td,
-.pdf-export th,
-.pdf-export span,
-.pdf-export div,
-.pdf-export strong,
-.pdf-export b {
-  color: black !important;
-}
-
-.pdf-export table {
-  border-color: black !important;
-}
-
-.pdf-export tr {
-  border-color: black !important;
-}
-
-
-/* Shine Effect for Feedback Button */
-@keyframes shine-loop {
-  0% {
-    background-position: 200% center;
-  }
-
-  100% {
-    background-position: -200% center;
-  }
-}
-
-.shine-feedback-btn {
-  background: linear-gradient(120deg,
-      rgba(255, 255, 255, 0.05) 40%,
-      rgba(255, 255, 255, 0.3) 50%,
-      rgba(255, 255, 255, 0.05) 60%);
-  background-size: 200% auto;
-  animation: shine-loop 3s linear infinite;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.shine-feedback-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
-  color: #fff !important;
 }
