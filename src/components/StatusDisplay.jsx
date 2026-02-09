@@ -1,20 +1,27 @@
 import { Loader2, CheckCircle, FileText } from 'lucide-react';
+import GridLoader from './GridLoader';
 
 const StatusDisplay = ({ status, message, onReset }) => {
     if (status === 'idle') return null;
 
     return (
-        <div className="glass-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '500px', margin: '2rem auto 0', textAlign: 'center' }}>
+        <div className="glass-panel animate-fade-in" style={{
+            padding: '4rem 3rem',
+            maxWidth: '600px',
+            margin: '0 auto',
+            textAlign: 'center',
+            transform: 'translateY(-10vh)'
+        }}>
 
             {(status === 'generating' || status === 'formatting') && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
 
-                    {/* New CSS Loader */}
-                    <div className="loader"></div>
+                    {/* Grid Loader with Logo and Pink Dot */}
+                    <GridLoader />
 
                     <div>
-                        <h3 style={{ margin: '0 0 0.5rem 0' }}>Working on it...</h3>
-                        <p style={{ margin: 0, color: 'var(--color-text-secondary)' }}>{message}</p>
+                        <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.8rem' }}>Working on it...</h3>
+                        <p style={{ margin: 0, color: 'var(--color-text-secondary)', fontSize: '1.2rem' }}>{message}</p>
                     </div>
                 </div>
             )}
@@ -52,14 +59,15 @@ const StatusDisplay = ({ status, message, onReset }) => {
 
             <style>
                 {`
+          /* Pink Ball CSS Loader */
           .loader {
-            width: 70px;
+            width: 120px;
             aspect-ratio: 2;
             background:
-              radial-gradient(farthest-side, #e25a83 90%, #0000) 0 0/8px 8px,
-              linear-gradient(#fff 0 0) 100% 0/30px 10px,
-              linear-gradient(#fff 0 0) 0 100%/30px 10px,
-              repeating-linear-gradient(90deg, #fff 0 10px, #0000 0 30px);
+              radial-gradient(farthest-side, #e25a83 90%, #0000) 0 0/12px 12px,
+              linear-gradient(#fff 0 0) 100% 0/45px 15px,
+              linear-gradient(#fff 0 0) 0 100%/45px 15px,
+              repeating-linear-gradient(90deg, #fff 0 15px, #0000 0 45px);
             background-repeat: no-repeat;
             animation: l6 2s infinite;
           }
