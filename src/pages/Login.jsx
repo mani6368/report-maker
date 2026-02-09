@@ -10,20 +10,9 @@ import logo from '../../logo.png'; // Import logo
 
 const Login = () => {
     const navigate = useNavigate();
-    const [isLogin, setIsLogin] = useState(true);
-    const [showPassword, setShowPassword] = useState(false);
-    const [hue, setHue] = useState(170); // Start Orange (Blue + 170deg)
-    const [formData, setFormData] = useState({
-        username: '',
-        email: '',
-        password: ''
-    });
+    // const [hue, setHue] = useState(170); // Kept for Orb if needed, or remove if static
 
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzQ0bJ47zyj28Y-587fS69nYjKj9fsOsuYRP_8my0P2d9QFFeuIH0HysnJ2SvRadX498w/exec";
-
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
 
     const handleGoogleSuccess = (credentialResponse) => {
         const decoded = jwtDecode(credentialResponse.credential);
@@ -54,46 +43,7 @@ const Login = () => {
         navigate('/home');
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
 
-        try {
-            // Determine display name
-            let displayName = formData.username;
-            if (isLogin) {
-                // Determine name from email if not registering
-                displayName = formData.email.split('@')[0];
-            }
-
-            // Save User to LocalStorage
-            localStorage.setItem('user', JSON.stringify({
-                name: displayName,
-                email: formData.email,
-                picture: null // No picture for manual login
-            }));
-
-            // INSTANT LOGIN (Fire and forget, no verification)
-            // User requested speed over invalid password checking
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                keepalive: true,
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify({
-                    ...formData,
-                    type: isLogin ? 'login' : 'register',
-                    timestamp: new Date().toISOString()
-                })
-            }).catch(err => console.error(err));
-
-            // Navigate immediately
-            navigate('/home');
-
-        } catch (error) {
-            console.error("Error submitting form", error);
-            navigate('/home'); // Fallback direct navigation
-        }
-    };
 
     return (
         <div className="login-wrapper">
@@ -124,89 +74,23 @@ const Login = () => {
 
                 <div className="glass-card">
                     <div className="card-header">
-                        <h2>{isLogin ? 'Log In' : 'Create Account'}</h2>
-                        <p>{isLogin ? 'Enter your credentials to access your account' : 'Sign up to get started'}</p>
+                        <h2>Log In</h2>
+                        <p>Sign in with Google to continue</p>
                     </div>
 
-                    <form onSubmit={handleSubmit}>
-                        {!isLogin && (
-                            <div className="input-group">
-                                <User size={18} className="input-icon" />
-                                <input
-                                    type="text"
-                                    name="username"
-                                    placeholder="Username"
-                                    value={formData.username}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                        )}
-
-                        <div className="input-group">
-                            <Mail size={18} className="input-icon" />
-                            <input
-                                type="email"
-                                name="email"
-                                placeholder="Email Address"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        <div className="input-group">
-                            <Lock size={18} className="input-icon" />
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                name="password"
-                                placeholder="Password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
-                            />
-                            <button
-                                type="button"
-                                className="password-toggle"
-                                onClick={() => setShowPassword(!showPassword)}
-                            >
-                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                            </button>
-                        </div>
-
-                        <button type="submit" className="submit-btn">
-                            {isLogin ? 'Log In' : 'Sign Up'}
-                            <ArrowRight size={18} />
-                        </button>
-
-                        <div style={{ display: 'flex', alignItems: 'center', margin: '1.5rem 0' }}>
-                            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.2)' }}></div>
-                            <span style={{ padding: '0 10px', color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem' }}>OR</span>
-                            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.2)' }}></div>
-                        </div>
-
-                        <div className="google-login-wrapper" style={{ display: 'flex', justifyContent: 'center' }}>
-                            <GoogleLogin
-                                onSuccess={handleGoogleSuccess}
-                                onError={() => {
-                                    console.log('Login Failed');
-                                    alert('Google Login Failed');
-                                }}
-                                theme="filled_black"
-                                shape="pill"
-                                text="continue_with"
-                            />
-                        </div>
-
-                    </form>
-
-                    <div className="card-footer">
-                        <p>
-                            {isLogin ? "Don't have an account? " : "Already have an account? "}
-                            <span onClick={() => setIsLogin(!isLogin)}>
-                                {isLogin ? 'Sign Up' : 'Log In'}
-                            </span>
-                        </p>
+                    <div className="google-login-wrapper" style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '2rem' }}>
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={() => {
+                                console.log('Login Failed');
+                                alert('Google Login Failed');
+                            }}
+                            theme="filled_black"
+                            shape="pill"
+                            text="continue_with"
+                            size="large"
+                            width="250"
+                        />
                     </div>
                 </div>
             </div>
