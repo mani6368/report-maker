@@ -110,7 +110,7 @@ const TopicInput = ({ onGenerate, isLoading, errorMessage = '', isMobile = false
     };
 
     return (
-        <div className="glass-panel" style={{ maxWidth: '600px', margin: '0 auto', width: '100%' }}>
+        <div className="glass-panel responsive-container">
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '1rem' : '1.5rem' }}>
 
                 {/* API Key Input */}

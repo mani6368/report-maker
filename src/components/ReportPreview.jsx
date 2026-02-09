@@ -11,7 +11,7 @@ const Page = ({ children, pageNumber }) => (
     </div>
 );
 
-const ReportPreview = ({ data, onDownload, onEdit, isEditMode, onRegenerate }) => {
+const ReportPreview = ({ data, onDownload, onEdit, isEditMode, onRegenerate, credits }) => {
     // We'll calculate pages on mount/change
     const [pages, setPages] = useState([]);
     const [editApiKey, setEditApiKey] = useState('');
@@ -321,43 +321,44 @@ const ReportPreview = ({ data, onDownload, onEdit, isEditMode, onRegenerate }) =
 
     if (!data) return null;
 
+
+    // [NEW] Credit Check
+    const isDownloadDisabled = credits !== undefined && credits < 10;
+
     return (
         <div className="animate-fade-in" style={{ paddingBottom: '4rem', userSelect: 'none' }}>
             {/* Toolbar */}
-            <div className="glass-panel" style={{
-                maxWidth: '210mm', margin: '0 auto 1.5rem', padding: '1.2rem 2rem',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                transition: 'filter 0.3s'
-            }}>
+            <div className="glass-panel responsive-container preview-toolbar">
                 <h3 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '700' }}>Preview of Your Report</h3>
                 <button
                     onClick={onDownload}
+                    disabled={isDownloadDisabled}
                     className="btn-primary"
                     style={{
                         display: 'flex',
                         gap: '0.8rem',
                         alignItems: 'center',
-                        backgroundColor: '#e25a83',
-                        padding: '1rem 2rem',
-                        fontSize: '1.2rem',
-                        borderRadius: '12px'
+                        backgroundColor: isDownloadDisabled ? '#374151' : '#e25a83', // Gray if disabled
+                        color: 'white', // always white text
+                        border: 'none',
+                        padding: '0.8rem 1.5rem',
+                        borderRadius: '30px',
+                        cursor: isDownloadDisabled ? 'not-allowed' : 'pointer',
+                        fontWeight: '600',
+                        fontSize: '1rem',
+                        opacity: isDownloadDisabled ? 0.8 : 1,
+                        boxShadow: isDownloadDisabled ? 'none' : '0 4px 15px rgba(226, 90, 131, 0.4)',
+                        transition: 'all 0.3s ease'
                     }}
                 >
-                    <FileDown size={24} /> Download Your Report
+                    <FileDown size={20} />
+                    {isDownloadDisabled ? 'Out of Credits' : 'Download Your Report'}
                 </button>
             </div>
 
             {/* Edit Button Section */}
             {onEdit && (
-                <div style={{
-                    maxWidth: '210mm',
-                    margin: '0 auto 1.5rem',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: '1.5rem',
-                    transition: 'filter 0.3s'
-                }}>
+                <div className="responsive-container preview-actions">
                     <button
                         onClick={onEdit}
                         className="btn-primary"
@@ -408,13 +409,11 @@ const ReportPreview = ({ data, onDownload, onEdit, isEditMode, onRegenerate }) =
 
             {/* Inline Editing Section */}
             {isEditMode && (
-                <div style={{
-                    maxWidth: '210mm',
+                <div className="responsive-container" style={{
                     margin: '0 auto 2rem',
                     background: 'rgba(255, 255, 255, 0.05)',
                     backdropFilter: 'blur(20px)',
                     borderRadius: '12px',
-                    padding: '2rem',
                     border: '1px solid rgba(255, 255, 255, 0.18)',
                     transition: 'filter 0.3s'
                 }}>

@@ -6,6 +6,9 @@ import TopicInput from './components/TopicInput';
 import StatusDisplay from './components/StatusDisplay';
 import ReportPreview from './components/ReportPreview';
 import Sidebar from './components/Sidebar'; // [NEW] Link Sidebar
+import CreditHeader from './components/CreditHeader'; // [NEW] Credit Header
+import ReferralModal from './components/ReferralModal'; // [NEW] Referral Modal
+import PromoModal from './components/PromoModal'; // [NEW] Promo Modal
 import { fetchReportContent } from './services/gemini';
 import { generateDocx } from './utils/docxGenerator';
 
@@ -21,6 +24,9 @@ function App() {
   const [reportData, setReportData] = useState(null);
   const [historyTrigger, setHistoryTrigger] = useState(0);
   const [currentReportId, setCurrentReportId] = useState(null); // Track current report ID
+  const [credits, setCredits] = useState(0); // [NEW] Credit State
+  const [showPromo, setShowPromo] = useState(false); // [NEW] Promo Modal State
+  const [showReferralModal, setShowReferralModal] = useState(false); // [NEW] Referral Modal State
 
   // Mobile & Sidebar State
   const [isMobile, setIsMobile] = useState(false); // Default to false, update in effect
@@ -124,22 +130,104 @@ function App() {
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     if (!reportData) return;
+
+    // [NEW] Check credits. If < 10, button is disabled anyway, but double check.
+    if (credits < 10) {
+      setMessage("You have insufficient credits (need 10). Cannot download report.");
+      return;
+    }
+
+    // Open Promo Modal
+    setShowPromo(true);
+  };
+
+  // [NEW] Initialize Credits
+  useEffect(() => {
+    const checkCredits = () => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user && user.email) {
+        const storedCredits = localStorage.getItem(`credits_${user.email}`);
+        console.log(`Checking credits for ${user.email}:`, storedCredits);
+
+        if (storedCredits === null || storedCredits === 'NaN') {
+          // First time user (or corrupted), give 20 credits
+          console.log('Initializing credits to 20');
+          localStorage.setItem(`credits_${user.email}`, '20');
+          setCredits(20);
+        } else {
+          const parsed = parseInt(storedCredits, 10);
+          console.log('Loaded credits:', parsed);
+          setCredits(isNaN(parsed) ? 20 : parsed);
+        }
+      }
+    };
+
+    checkCredits();
+    // Re-check on focus in case it changed in another tab
+    window.addEventListener('focus', checkCredits);
+    return () => window.removeEventListener('focus', checkCredits);
+  }, []);
+
+
+  const handleEditReport = () => {
+    // Toggle edit mode
+    setStatus(status === 'editing' ? 'preview' : 'editing');
+  };
+
+  const executeDownload = async ({ free = false } = {}) => {
     try {
       await generateDocx(reportData, reportData.fontSizes?.content || 14, reportData.fontSizes?.chapter || 16);
-      // Keep preview open, just update message
-      // setStatus('complete'); 
-      setMessage('Download started! You can continue previewing or generate a "New Report".');
+
+      if (!free) {
+        // [NEW] Deduct Credit Logic
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user && user.email) {
+          const newCredits = credits - 10;
+          setCredits(newCredits);
+          localStorage.setItem(`credits_${user.email}`, newCredits.toString());
+        }
+        setMessage('Download started! 10 Credits deducted.');
+      } else {
+        setMessage('Download started! Super Promo applied! (No credit deducted).');
+      }
+
     } catch (err) {
       console.error(err);
       alert("Failed to create document");
     }
   };
 
-  const handleEditReport = () => {
-    // Toggle edit mode
-    setStatus(status === 'editing' ? 'preview' : 'editing');
+  const handlePromoProceed = (code) => {
+    setShowPromo(false);
+    if (code && code.trim().toUpperCase() === 'SUPERSTAR') {
+      // Free Download
+      executeDownload({ free: true });
+    } else {
+      // Standard deduction for invalid/empty code (as confirmed in plan)
+      executeDownload({ free: false });
+    }
+  };
+
+  const handlePromoNoCode = () => {
+    setShowPromo(false);
+    executeDownload({ free: false });
+  };
+
+  const handleReferralClick = () => {
+    setShowReferralModal(true);
+  };
+
+  const handleRedeemSuccess = () => {
+    // Add 50 credits
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.email) {
+      const newCredits = credits + 50;
+      setCredits(newCredits);
+      localStorage.setItem(`credits_${user.email}`, newCredits.toString());
+      setMessage('Congratulations! You earned 50 credits from a referral.');
+    }
   };
 
   const handleRegenerateReport = async ({ apiKey, pageCount, contentFontSize, chapterFontSize, editPrompt }) => {
@@ -250,6 +338,26 @@ function App() {
         isOpen={isSidebarOpen}
         onToggle={() => setSidebarOpen(!isSidebarOpen)}
         onClose={() => setSidebarOpen(false)}
+        onReferral={handleReferralClick}
+      />
+
+      {/* Credit Header [NEW] - Show on both Desktop and Mobile, pass isMobile prop for positioning */}
+      <CreditHeader credits={credits} isMobile={isMobile} />
+
+      {/* Promo Modal */}
+      <PromoModal
+        isOpen={showPromo}
+        onClose={() => setShowPromo(false)}
+        onProceed={handlePromoProceed}
+        onNoCode={handlePromoNoCode}
+      />
+
+      {/* Referral Modal */}
+      <ReferralModal
+        isOpen={showReferralModal}
+        onClose={() => setShowReferralModal(false)}
+        userEmail={JSON.parse(localStorage.getItem('user'))?.email}
+        onRedeemSuccess={handleRedeemSuccess}
       />
 
       {/* Mobile Top Bar */}
@@ -360,6 +468,7 @@ function App() {
               onEdit={handleEditReport}
               isEditMode={status === 'editing'}
               onRegenerate={handleRegenerateReport}
+              credits={credits} // [NEW] Pass credits
             />
           )}
 

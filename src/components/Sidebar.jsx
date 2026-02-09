@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { User, LogOut, FileText, PenSquare, PanelLeftClose, PanelLeftOpen, Search, Edit } from 'lucide-react';
+import { User, LogOut, FileText, PenSquare, PanelLeftClose, PanelLeftOpen, Search, Edit, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../../logo.png';
 
-const Sidebar = ({ historyTrigger, isMobile, isOpen, onToggle, onClose }) => {
+const Sidebar = ({ historyTrigger, isMobile, isOpen, onToggle, onClose, onReferral }) => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [history, setHistory] = useState([]);
@@ -174,32 +174,62 @@ const Sidebar = ({ historyTrigger, isMobile, isOpen, onToggle, onClose }) => {
 
 
                     {(showSidebar || isMobile) && (
-                        <button
-                            onClick={handleNewReport}
-                            style={{
-                                width: '100%',
-                                background: 'transparent',
-                                border: 'none',
-                                color: 'white',
-                                padding: '0.75rem',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                fontSize: '1.15rem',
-                                transition: 'all 0.2s'
-                            }}
-                            onMouseOver={(e) => {
-                                e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-                            }}
-                            onMouseOut={(e) => {
-                                e.currentTarget.style.background = 'transparent';
-                            }}
-                        >
-                            <PenSquare size={18} />
-                            New Report
-                        </button>
+                        <>
+                            <button
+                                onClick={handleNewReport}
+                                style={{
+                                    width: '100%',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: 'white',
+                                    padding: '0.75rem',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    fontSize: '1.15rem',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.background = 'transparent';
+                                }}
+                            >
+                                <PenSquare size={18} />
+                                New Report
+                            </button>
+
+                            <button
+                                onClick={onReferral}
+                                style={{
+                                    width: '100%',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: '#4ade80', // Green text to stand out slightly or just white
+                                    padding: '0.75rem',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    fontSize: '1.15rem',
+                                    transition: 'all 0.2s',
+                                    marginTop: '0.2rem'
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.background = 'rgba(74, 222, 128, 0.1)';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.background = 'transparent';
+                                }}
+                            >
+                                <Users size={18} />
+                                Refer a Friend
+                            </button>
+                        </>
                     )}
                 </div>
 
@@ -486,7 +516,7 @@ const Sidebar = ({ historyTrigger, isMobile, isOpen, onToggle, onClose }) => {
                         </div>
                     )}
                 </div>
-            </div>
+            </div >
         </>
     );
 };
