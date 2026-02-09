@@ -258,266 +258,265 @@ function App() {
       }
     }
   };
-};
 
-const handleRegenerateReport = async ({ apiKey, pageCount, contentFontSize, chapterFontSize, editPrompt }) => {
-  try {
-    setStatus('generating');
-    setMessage('Regenerating report with your changes...');
+  const handleRegenerateReport = async ({ apiKey, pageCount, contentFontSize, chapterFontSize, editPrompt }) => {
+    try {
+      setStatus('generating');
+      setMessage('Regenerating report with your changes...');
 
-    // Get the original topic from current report
-    const history = JSON.parse(localStorage.getItem('generation_history') || '[]');
-    const currentReport = history.find(r => r.id === currentReportId);
+      // Get the original topic from current report
+      const history = JSON.parse(localStorage.getItem('generation_history') || '[]');
+      const currentReport = history.find(r => r.id === currentReportId);
 
-    if (!currentReport) {
-      throw new Error('Original report not found');
-    }
-
-    const originalTopic = currentReport.topic;
-
-    // Build the modified topic/prompt
-    let modifiedTopic = originalTopic;
-    if (editPrompt) {
-      modifiedTopic = `${originalTopic}\n\nADDITIONAL EDITING INSTRUCTIONS: ${editPrompt}`;
-    }
-
-    // Regenerate the report with existing data context
-    const data = await fetchReportContent(modifiedTopic, apiKey, pageCount, null, 0, currentReport.reportData);
-
-    // Update preview with new data
-    setReportData({ ...data, fontSizes: { content: contentFontSize, chapter: chapterFontSize } });
-    setStatus('preview');
-    setMessage('Report regenerated successfully!');
-
-    // Save as edited version under the original report
-    const editedVersionId = `${currentReportId}_edit_${Date.now()}`;
-    const editedVersion = {
-      id: editedVersionId,
-      topic: originalTopic,
-      date: new Date().toISOString(),
-      reportData: { ...data, fontSizes: { content: contentFontSize, chapter: chapterFontSize } },
-      pageCount,
-      editPrompt: editPrompt || 'Modified settings',
-      isEditedVersion: true,
-      parentId: currentReportId
-    };
-
-    // Update history: add edited version to parent's editedVersions array
-    const updatedHistory = history.map(report => {
-      if (report.id === currentReportId) {
-        return {
-          ...report,
-          editedVersions: [...(report.editedVersions || []), editedVersion]
-        };
+      if (!currentReport) {
+        throw new Error('Original report not found');
       }
-      return report;
-    });
 
-    localStorage.setItem('generation_history', JSON.stringify(updatedHistory));
-    setHistoryTrigger(prev => prev + 1); // Trigger sidebar update
-    setCurrentReportId(editedVersionId); // Update to show we're viewing the edited version
+      const originalTopic = currentReport.topic;
 
-    return { success: true };
+      // Build the modified topic/prompt
+      let modifiedTopic = originalTopic;
+      if (editPrompt) {
+        modifiedTopic = `${originalTopic}\n\nADDITIONAL EDITING INSTRUCTIONS: ${editPrompt}`;
+      }
 
-  } catch (err) {
-    console.error('Regeneration error:', err);
-    // Stay in editing mode and return error message
-    setStatus('editing');
-    const errorMsg = err.message || 'Failed to regenerate report.';
-    let userMessage = '';
+      // Regenerate the report with existing data context
+      const data = await fetchReportContent(modifiedTopic, apiKey, pageCount, null, 0, currentReport.reportData);
 
-    if (errorMsg.includes('429') || errorMsg.includes('quota') || errorMsg.includes('Quota')) {
-      userMessage = 'API quota exceeded! Please check your API key and try again.';
-    } else if (errorMsg.includes('API key') || errorMsg.includes('API_KEY_INVALID') || errorMsg.includes('Invalid')) {
-      userMessage = 'Invalid API key provided. Please enter a valid Gemini API key.';
-    } else {
-      userMessage = errorMsg;
+      // Update preview with new data
+      setReportData({ ...data, fontSizes: { content: contentFontSize, chapter: chapterFontSize } });
+      setStatus('preview');
+      setMessage('Report regenerated successfully!');
+
+      // Save as edited version under the original report
+      const editedVersionId = `${currentReportId}_edit_${Date.now()}`;
+      const editedVersion = {
+        id: editedVersionId,
+        topic: originalTopic,
+        date: new Date().toISOString(),
+        reportData: { ...data, fontSizes: { content: contentFontSize, chapter: chapterFontSize } },
+        pageCount,
+        editPrompt: editPrompt || 'Modified settings',
+        isEditedVersion: true,
+        parentId: currentReportId
+      };
+
+      // Update history: add edited version to parent's editedVersions array
+      const updatedHistory = history.map(report => {
+        if (report.id === currentReportId) {
+          return {
+            ...report,
+            editedVersions: [...(report.editedVersions || []), editedVersion]
+          };
+        }
+        return report;
+      });
+
+      localStorage.setItem('generation_history', JSON.stringify(updatedHistory));
+      setHistoryTrigger(prev => prev + 1); // Trigger sidebar update
+      setCurrentReportId(editedVersionId); // Update to show we're viewing the edited version
+
+      return { success: true };
+
+    } catch (err) {
+      console.error('Regeneration error:', err);
+      // Stay in editing mode and return error message
+      setStatus('editing');
+      const errorMsg = err.message || 'Failed to regenerate report.';
+      let userMessage = '';
+
+      if (errorMsg.includes('429') || errorMsg.includes('quota') || errorMsg.includes('Quota')) {
+        userMessage = 'API quota exceeded! Please check your API key and try again.';
+      } else if (errorMsg.includes('API key') || errorMsg.includes('API_KEY_INVALID') || errorMsg.includes('Invalid')) {
+        userMessage = 'Invalid API key provided. Please enter a valid Gemini API key.';
+      } else {
+        userMessage = errorMsg;
+      }
+
+      setMessage(userMessage);
+      return { success: false, error: userMessage };
     }
+  };
 
-    setMessage(userMessage);
-    return { success: false, error: userMessage };
-  }
-};
-
-return (
-  <div style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
-    {/* Background Layer */}
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100%',
-      zIndex: 0,
-      transform: isMobile ? 'translateX(0)' : `translateX(${isSidebarOpen ? '170px' : '30px'})`
-    }}>
-      <Orb
-        hoverIntensity={0}
-        rotateOnHover
-        hue={0}
-        baseColor="#e75b73"
-        forceHoverState
-        backgroundColor="#000000"
-      />
-    </div>
-
-    {/* Sidebar [NEW] */}
-    <Sidebar
-      historyTrigger={historyTrigger}
-      isMobile={isMobile}
-      isOpen={isSidebarOpen}
-      onToggle={() => setSidebarOpen(!isSidebarOpen)}
-      onClose={() => setSidebarOpen(false)}
-      onReferral={handleReferralClick}
-    />
-
-    {/* Credit Header [NEW] - Show on both Desktop and Mobile, pass isMobile prop for positioning */}
-    <CreditHeader credits={credits} isMobile={isMobile} />
-
-    {/* Promo Modal */}
-    <PromoModal
-      isOpen={showPromo}
-      onClose={() => setShowPromo(false)}
-      onProceed={handlePromoProceed}
-      onNoCode={handlePromoNoCode}
-    />
-
-    {/* Referral Modal */}
-    <ReferralModal
-      isOpen={showReferralModal}
-      onClose={() => setShowReferralModal(false)}
-      userEmail={JSON.parse(localStorage.getItem('user'))?.email}
-      onRedeemSuccess={handleRedeemSuccess}
-    />
-
-    {/* Mobile Top Bar */}
-    {isMobile && (
+  return (
+    <div style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+      {/* Background Layer */}
       <div style={{
         position: 'fixed',
         top: 0,
         left: 0,
-        right: 0,
-        height: '60px',
-        background: '#000000',
+        width: '100vw',
+        height: '100%',
+        zIndex: 0,
+        transform: isMobile ? 'translateX(0)' : `translateX(${isSidebarOpen ? '170px' : '30px'})`
+      }}>
+        <Orb
+          hoverIntensity={0}
+          rotateOnHover
+          hue={0}
+          baseColor="#e75b73"
+          forceHoverState
+          backgroundColor="#000000"
+        />
+      </div>
+
+      {/* Sidebar [NEW] */}
+      <Sidebar
+        historyTrigger={historyTrigger}
+        isMobile={isMobile}
+        isOpen={isSidebarOpen}
+        onToggle={() => setSidebarOpen(!isSidebarOpen)}
+        onClose={() => setSidebarOpen(false)}
+        onReferral={handleReferralClick}
+      />
+
+      {/* Credit Header [NEW] - Show on both Desktop and Mobile, pass isMobile prop for positioning */}
+      <CreditHeader credits={credits} isMobile={isMobile} />
+
+      {/* Promo Modal */}
+      <PromoModal
+        isOpen={showPromo}
+        onClose={() => setShowPromo(false)}
+        onProceed={handlePromoProceed}
+        onNoCode={handlePromoNoCode}
+      />
+
+      {/* Referral Modal */}
+      <ReferralModal
+        isOpen={showReferralModal}
+        onClose={() => setShowReferralModal(false)}
+        userEmail={JSON.parse(localStorage.getItem('user'))?.email}
+        onRedeemSuccess={handleRedeemSuccess}
+      />
+
+      {/* Mobile Top Bar */}
+      {isMobile && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '60px',
+          background: '#000000',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 1rem',
+          zIndex: 90,
+          borderBottom: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          <button
+            onClick={() => setSidebarOpen(true)}
+            style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}
+          >
+            <Menu size={24} />
+          </button>
+
+          <h2 style={{ fontSize: '1.2rem', fontWeight: '600', margin: 0, color: 'white' }}>
+            Report-maker.ai
+          </h2>
+
+          <button
+            onClick={() => window.location.reload()}
+            style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}
+          >
+            <Plus size={24} />
+          </button>
+        </div>
+      )}
+
+      {/* Content Layer [UPDATED Layout] */}
+      <div className="animate-fade-in" style={{
+        position: 'fixed',
+        top: 0,
+        left: isMobile ? 0 : (isSidebarOpen ? '340px' : '60px'),
+        width: isMobile ? '100%' : `calc(100% - ${isSidebarOpen ? '340px' : '60px'})`,
+        // maxWidth: '1000px', // [REMOVED] To allow full-width centering
+        height: '100vh',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 1rem',
-        zIndex: 90,
-        borderBottom: '1px solid rgba(255,255,255,0.1)'
+        transition: 'left 0.3s ease, width 0.3s ease',
+        zIndex: 1,
+        // [MO] extra top padding for mobile to clear nav bar
+        padding: isMobile ? '6rem 1rem 1rem' : '2rem',
+        boxSizing: 'border-box',
+        overflowY: 'auto', // Enable vertical scrolling for the entire content area
+        overflowX: 'hidden' // Prevent horizontal scroll
       }}>
-        <button
-          onClick={() => setSidebarOpen(true)}
-          style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}
-        >
-          <Menu size={24} />
-        </button>
+        <header style={{ textAlign: 'center', paddingTop: isMobile ? '0' : '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+          <h1 style={{
+            fontSize: isMobile ? '2.0rem' : '4rem',
+            margin: '0',
+            lineHeight: 1.2,
+            color: '#ffffff',
+            whiteSpace: 'nowrap'
+          }}>
+            Report-maker.ai
+          </h1>
+          <p style={{ color: '#e25a83', fontSize: isMobile ? '1rem' : '1.4rem', margin: '0', fontStyle: 'italic', fontWeight: '500', textShadow: '0 0 10px rgba(226, 90, 131, 0.4)', whiteSpace: 'nowrap' }}>
+            Designed to Save Your Valuable Time
+          </p>
+        </header>
 
-        <h2 style={{ fontSize: '1.2rem', fontWeight: '600', margin: 0, color: 'white' }}>
-          Report-maker.ai
-        </h2>
 
-        <button
-          onClick={() => window.location.reload()}
-          style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}
-        >
-          <Plus size={24} />
-        </button>
-      </div>
-    )}
+        <main style={{
+          display: 'flex',
+          alignItems: status === 'preview' ? 'flex-start' : 'center', // Fix scrolling: start at top for long content
+          justifyContent: 'center',
+          flex: 1,
+          width: '100%',
+          maxWidth: '2000px',
+          overflowY: 'visible' // Ensure scroll works
+        }}>
+          {status === 'idle' || status === 'error' ? (
+            <div style={{ width: '100%', maxWidth: '1000px' }}>
+              {/* Pass error message to TopicInput instead of showing StatusDisplay */}
+              <TopicInput
+                onGenerate={handleGenerate}
+                isLoading={status === 'generating'}
+                errorMessage={status === 'error' ? message : ''}
+                isMobile={isMobile}
+              />
+            </div>
+          ) : null}
 
-    {/* Content Layer [UPDATED Layout] */}
-    <div className="animate-fade-in" style={{
-      position: 'fixed',
-      top: 0,
-      left: isMobile ? 0 : (isSidebarOpen ? '340px' : '60px'),
-      width: isMobile ? '100%' : `calc(100% - ${isSidebarOpen ? '340px' : '60px'})`,
-      // maxWidth: '1000px', // [REMOVED] To allow full-width centering
-      height: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      transition: 'left 0.3s ease, width 0.3s ease',
-      zIndex: 1,
-      // [MO] extra top padding for mobile to clear nav bar
-      padding: isMobile ? '6rem 1rem 1rem' : '2rem',
-      boxSizing: 'border-box',
-      overflowY: 'auto', // Enable vertical scrolling for the entire content area
-      overflowX: 'hidden' // Prevent horizontal scroll
-    }}>
-      <header style={{ textAlign: 'center', paddingTop: isMobile ? '0' : '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-        <h1 style={{
-          fontSize: isMobile ? '2.0rem' : '4rem',
-          margin: '0',
-          lineHeight: 1.2,
-          color: '#ffffff',
+          {status === 'complete' && (
+            <StatusDisplay status={'complete'} message={message} onReset={() => setStatus('idle')} />
+          )}
+
+          {status === 'generating' && (
+            <StatusDisplay status={status} message={message} />
+          )}
+
+          {(status === 'preview' || status === 'editing') && reportData && (
+            <ReportPreview
+              data={reportData}
+              onDownload={handleDownload}
+              onEdit={handleEditReport}
+              isEditMode={status === 'editing'}
+              onRegenerate={handleRegenerateReport}
+              credits={credits} // [NEW] Pass credits
+            />
+          )}
+
+
+        </main>
+
+        <footer style={{
+          color: 'rgba(255, 255, 255, 0.8)',
+          fontSize: '0.9rem',
+          textAlign: 'center',
+          paddingBottom: isMobile ? '1rem' : '2rem',
+          zIndex: 2,
           whiteSpace: 'nowrap'
         }}>
-          Report-maker.ai
-        </h1>
-        <p style={{ color: '#e25a83', fontSize: isMobile ? '1rem' : '1.4rem', margin: '0', fontStyle: 'italic', fontWeight: '500', textShadow: '0 0 10px rgba(226, 90, 131, 0.4)', whiteSpace: 'nowrap' }}>
-          Designed to Save Your Valuable Time
-        </p>
-      </header>
-
-
-      <main style={{
-        display: 'flex',
-        alignItems: status === 'preview' ? 'flex-start' : 'center', // Fix scrolling: start at top for long content
-        justifyContent: 'center',
-        flex: 1,
-        width: '100%',
-        maxWidth: '2000px',
-        overflowY: 'visible' // Ensure scroll works
-      }}>
-        {status === 'idle' || status === 'error' ? (
-          <div style={{ width: '100%', maxWidth: '1000px' }}>
-            {/* Pass error message to TopicInput instead of showing StatusDisplay */}
-            <TopicInput
-              onGenerate={handleGenerate}
-              isLoading={status === 'generating'}
-              errorMessage={status === 'error' ? message : ''}
-              isMobile={isMobile}
-            />
-          </div>
-        ) : null}
-
-        {status === 'complete' && (
-          <StatusDisplay status={'complete'} message={message} onReset={() => setStatus('idle')} />
-        )}
-
-        {status === 'generating' && (
-          <StatusDisplay status={status} message={message} />
-        )}
-
-        {(status === 'preview' || status === 'editing') && reportData && (
-          <ReportPreview
-            data={reportData}
-            onDownload={handleDownload}
-            onEdit={handleEditReport}
-            isEditMode={status === 'editing'}
-            onRegenerate={handleRegenerateReport}
-            credits={credits} // [NEW] Pass credits
-          />
-        )}
-
-
-      </main>
-
-      <footer style={{
-        color: 'rgba(255, 255, 255, 0.8)',
-        fontSize: '0.9rem',
-        textAlign: 'center',
-        paddingBottom: isMobile ? '1rem' : '2rem',
-        zIndex: 2,
-        whiteSpace: 'nowrap'
-      }}>
-        <span>© {new Date().getFullYear()} Report-maker.ai.</span>
-      </footer>
+          <span>© {new Date().getFullYear()} Report-maker.ai.</span>
+        </footer>
+      </div>
     </div>
-  </div>
-);
+  );
 }
 
 export default App;
