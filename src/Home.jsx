@@ -252,6 +252,10 @@ function App() {
           const newRefCredits = currentRefCredits + 10;
           localStorage.setItem(`credits_${referrerEmail}`, newRefCredits.toString());
           console.log(`Referrer (${referrerEmail}) rewarded! New Balance: ${newRefCredits}`);
+          alert(`[Simulation] Referrer (${referrerEmail}) found on this device! Added 10 credits to their stash.`);
+        } else {
+          console.log("Referrer not found on this device (Simulation limitation).");
+          // alert("[Simulation Info] Could not add 10 credits to referrer. Reason: Their data is not on this specific browser/device."); 
         }
       } catch (e) {
         console.error("Error simulating referrer reward:", e);
