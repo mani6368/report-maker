@@ -74,7 +74,7 @@ const Login = () => {
 
                 <div className="glass-card">
                     <div className="card-header">
-                        <h2>Log In</h2>
+                        <h2>Sign In</h2>
                         <p>Sign in with Google to continue</p>
                     </div>
 
@@ -87,7 +87,7 @@ const Login = () => {
                             }}
                             theme="filled_black"
                             shape="pill"
-                            text="continue_with"
+                            text="signin_with"
                             size="large"
                             width="250"
                         />
