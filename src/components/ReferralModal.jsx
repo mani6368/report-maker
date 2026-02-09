@@ -75,9 +75,9 @@ const ReferralModal = ({ isOpen, onClose, userEmail, onRedeemSuccess }) => {
         setHasRedeemed(true);
 
         // Trigger credit update in parent
-        onRedeemSuccess();
+        onRedeemSuccess(cleanCode);
 
-        setSuccessMsg('Success! 50 Credits added to your account.');
+        setSuccessMsg('Success! 50 Credits added to you & 10 to referrer!');
     };
 
     return (
