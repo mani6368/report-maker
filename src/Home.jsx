@@ -10,6 +10,7 @@ import CreditHeader from './components/CreditHeader'; // [NEW] Credit Header
 import ReferralModal from './components/ReferralModal'; // [NEW] Referral Modal
 import PromoModal from './components/PromoModal'; // [NEW] Promo Modal
 import { fetchReportContent } from './services/gemini';
+import { fetchGroqReportContent } from './services/groq';
 import { generateDocx } from './utils/docxGenerator';
 
 import Orb from './components/Orb';
@@ -31,6 +32,9 @@ function App() {
   // Mobile & Sidebar State
   const [isMobile, setIsMobile] = useState(false); // Default to false, update in effect
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+
+  // [NEW] Provider State (lifted from TopicInput to persist across mounts)
+  const [provider, setProvider] = useState('gemini');
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 768px)');
@@ -77,17 +81,22 @@ function App() {
     return () => window.removeEventListener('loadReport', handleLoadReport);
   }, []);
 
-  const handleGenerate = async (topic, pageCount, apiKey, fileContent, imageCount, contentFontSize, chapterFontSize) => {
+  const handleGenerate = async (topic, pageCount, apiKey, fileContent, imageCount, contentFontSize, chapterFontSize, provider = 'gemini') => {
     setStatus('generating');
     setMessage(`Our AI is writing your report...`);
     setReportData(null);
 
     try {
-      // 1. Fetch Content
-      const data = await fetchReportContent(topic, apiKey, pageCount, fileContent, imageCount);
+      // 1. Fetch Content based on provider
+      let data;
+      if (provider === 'groq') {
+        data = await fetchGroqReportContent(topic, apiKey, pageCount, fileContent, imageCount);
+      } else {
+        data = await fetchReportContent(topic, apiKey, pageCount, fileContent, imageCount);
+      }
 
       // 2. Show Preview
-      setReportData({ ...data, fontSizes: { content: contentFontSize, chapter: chapterFontSize } });
+      setReportData({ ...data, fontSizes: { content: contentFontSize, chapter: chapterFontSize }, provider });
       setStatus('preview');
       setMessage('Report generated! Preview it below.');
 
@@ -98,7 +107,7 @@ function App() {
           id: reportId,
           topic,
           date: new Date().toISOString(),
-          reportData: { ...data, fontSizes: { content: contentFontSize, chapter: chapterFontSize } }, // Store full report content
+          reportData: { ...data, fontSizes: { content: contentFontSize, chapter: chapterFontSize }, provider }, // Store full report content & provider
           pageCount, // Store page count for editing
           editedVersions: [] // Initialize empty edited versions array
         };
@@ -114,17 +123,29 @@ function App() {
     } catch (err) {
       console.error(err);
       setStatus('error');
-      // Check for quota/rate limit errors first
+
       const errorMsg = err.message || 'Something went wrong.';
-      if (errorMsg.includes('429') ||
+
+      // Check if this is a Groq error with specific message
+      if (errorMsg.includes('[Groq]')) {
+        // Show the actual Groq error message
+        const cleanMsg = errorMsg.replace('[Groq] ', '');
+        setMessage(`Groq Error: ${cleanMsg}`);
+      }
+      // Check for quota/rate limit errors
+      else if (errorMsg.includes('429') ||
         errorMsg.includes('quota') ||
         errorMsg.includes('Quota') ||
         errorMsg.includes('exceeded') ||
         errorMsg.includes('rate limit')) {
         setMessage('Your API quota has been exceeded! Please enter a new API key to continue.');
-      } else if (errorMsg.includes('API key') || errorMsg.includes('API_KEY_INVALID')) {
+      }
+      // Check for API key errors
+      else if (errorMsg.includes('API key') || errorMsg.includes('API_KEY_INVALID')) {
         setMessage('Your API key is invalid');
-      } else {
+      }
+      // Default error
+      else {
         setMessage(errorMsg);
       }
     }
@@ -263,20 +284,27 @@ function App() {
     }
   };
 
-  const handleRegenerateReport = async ({ apiKey, pageCount, contentFontSize, chapterFontSize, editPrompt }) => {
+  const handleRegenerateReport = async ({ apiKey, pageCount, contentFontSize, chapterFontSize, editPrompt, provider = 'gemini' }) => {
     try {
       setStatus('generating');
-      setMessage('Regenerating report with your changes...');
+      setMessage(`Regenerating your report...`);
 
       // Get the original topic from current report
       const history = JSON.parse(localStorage.getItem('generation_history') || '[]');
       const currentReport = history.find(r => r.id === currentReportId);
 
-      if (!currentReport) {
-        throw new Error('Original report not found');
-      }
+      // Use current report's title as topic if original not found
+      let originalTopic;
+      let existingData = null;
 
-      const originalTopic = currentReport.topic;
+      if (currentReport) {
+        originalTopic = currentReport.topic;
+        existingData = currentReport.reportData;
+      } else {
+        // Fallback: use current displayed report data
+        originalTopic = reportData?.title || 'Report';
+        existingData = reportData;
+      }
 
       // Build the modified topic/prompt
       let modifiedTopic = originalTopic;
@@ -285,10 +313,17 @@ function App() {
       }
 
       // Regenerate the report with existing data context
-      const data = await fetchReportContent(modifiedTopic, apiKey, pageCount, null, 0, currentReport.reportData);
+      let data;
+      if (provider === 'groq') {
+        // Groq service
+        data = await fetchGroqReportContent(modifiedTopic, apiKey, pageCount, null, 0, existingData);
+      } else {
+        // Gemini service
+        data = await fetchReportContent(modifiedTopic, apiKey, pageCount, null, 0, existingData);
+      }
 
       // Update preview with new data
-      setReportData({ ...data, fontSizes: { content: contentFontSize, chapter: chapterFontSize } });
+      setReportData({ ...data, fontSizes: { content: contentFontSize, chapter: chapterFontSize }, provider });
       setStatus('preview');
       setMessage('Report regenerated successfully!');
 
@@ -298,7 +333,7 @@ function App() {
         id: editedVersionId,
         topic: originalTopic,
         date: new Date().toISOString(),
-        reportData: { ...data, fontSizes: { content: contentFontSize, chapter: chapterFontSize } },
+        reportData: { ...data, fontSizes: { content: contentFontSize, chapter: chapterFontSize }, provider },
         pageCount,
         editPrompt: editPrompt || 'Modified settings',
         isEditedVersion: true,
@@ -332,7 +367,7 @@ function App() {
       if (errorMsg.includes('429') || errorMsg.includes('quota') || errorMsg.includes('Quota')) {
         userMessage = 'API quota exceeded! Please check your API key and try again.';
       } else if (errorMsg.includes('API key') || errorMsg.includes('API_KEY_INVALID') || errorMsg.includes('Invalid')) {
-        userMessage = 'Invalid API key provided. Please enter a valid Gemini API key.';
+        userMessage = 'Invalid API key provided. Please enter a valid API key.';
       } else {
         userMessage = errorMsg;
       }
@@ -481,6 +516,9 @@ function App() {
                 onGenerate={handleGenerate}
                 isLoading={status === 'generating'}
                 errorMessage={status === 'error' ? message : ''}
+                onClearError={() => { setStatus('idle'); setMessage(''); }}
+                provider={provider}
+                onProviderChange={setProvider}
                 isMobile={isMobile}
               />
             </div>

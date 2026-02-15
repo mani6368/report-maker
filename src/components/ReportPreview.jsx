@@ -14,6 +14,7 @@ const Page = ({ children, pageNumber }) => (
 const ReportPreview = ({ data, onDownload, onEdit, isEditMode, onRegenerate, credits }) => {
     // We'll calculate pages on mount/change
     const [pages, setPages] = useState([]);
+    const [editProvider, setEditProvider] = useState('gemini'); // Default to gemini, can switch
     const [editApiKey, setEditApiKey] = useState('');
     const [editPageCount, setEditPageCount] = useState(20);
     const [editContentFontSize, setEditContentFontSize] = useState(14);
@@ -30,6 +31,7 @@ const ReportPreview = ({ data, onDownload, onEdit, isEditMode, onRegenerate, cre
         setEditPageCount(data.requestedPages || 20);
         setEditContentFontSize(data.fontSizes?.content || 14);
         setEditChapterFontSize(data.fontSizes?.chapter || 16);
+        if (data.provider) setEditProvider(data.provider);
 
         const allPages = [];
 
@@ -462,16 +464,68 @@ const ReportPreview = ({ data, onDownload, onEdit, isEditMode, onRegenerate, cre
                         </div>
                     )}
 
+                    {/* Provider Selection */}
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'white' }}>
+                            <Sparkles size={18} /> Select AI Model
+                        </label>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button
+                                onClick={() => setEditProvider('gemini')}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.6rem',
+                                    borderRadius: '6px',
+                                    border: editProvider === 'gemini' ? '2px solid #e25a83' : '1px solid rgba(255,255,255,0.2)',
+                                    background: editProvider === 'gemini' ? 'rgba(226, 90, 131, 0.2)' : 'rgba(0,0,0,0.3)',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    fontWeight: editProvider === 'gemini' ? 'bold' : 'normal'
+                                }}
+                            >
+                                Google Gemini
+                            </button>
+                            <button
+                                onClick={() => setEditProvider('groq')}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.6rem',
+                                    borderRadius: '6px',
+                                    border: editProvider === 'groq' ? '2px solid #10a37f' : '1px solid rgba(255,255,255,0.2)',
+                                    background: editProvider === 'groq' ? 'rgba(16, 163, 127, 0.2)' : 'rgba(0,0,0,0.3)',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    fontWeight: editProvider === 'groq' ? 'bold' : 'normal'
+                                }}
+                            >
+                                Groq Llama 3.3
+                            </button>
+                        </div>
+                    </div>
+
                     {/* API Key Input */}
                     <div style={{ marginBottom: '1.5rem' }}>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'white' }}>
-                            <Key size={18} /> Fresh API Key (Required)
+                            <Key size={18} /> Fresh {editProvider === 'gemini' ? 'Gemini' : 'Groq'} API Key
                         </label>
                         <input
                             type="password"
                             value={editApiKey}
-                            onChange={(e) => setEditApiKey(e.target.value)}
-                            placeholder="Enter new API key for regeneration"
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setEditApiKey(val);
+
+                                // Smart Switch: Auto-detect provider based on key prefix
+                                const cleanVal = val.trim();
+                                if (cleanVal.startsWith('gsk_') && editProvider !== 'groq') {
+                                    setEditProvider('groq');
+                                } else if (cleanVal.startsWith('AIza') && editProvider !== 'gemini') {
+                                    setEditProvider('gemini');
+                                }
+
+                                if (errorMessage) setErrorMessage('');
+                            }}
+                            placeholder={`Enter new ${editProvider === 'gemini' ? 'Gemini' : 'Groq'} API key`}
                             style={{
                                 width: '100%',
                                 padding: '0.75rem',
@@ -484,9 +538,20 @@ const ReportPreview = ({ data, onDownload, onEdit, isEditMode, onRegenerate, cre
                                 boxSizing: 'border-box'
                             }}
                         />
+                        {/* Get API Key Link */}
+                        <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>
+                            Don't have one? <a
+                                href={editProvider === 'gemini' ? 'https://aistudio.google.com/app/apikey' : 'https://console.groq.com/keys'}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{ color: 'white' }}
+                            >
+                                Get it here
+                            </a> <span style={{ color: 'white' }}>(Free)</span>
+                        </div>
                     </div>
 
-                    {/* Page Count */}
+                    {/* Number of Pages */}
                     <div style={{ marginBottom: '1.5rem' }}>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'white' }}>
                             <FileText size={18} /> Number of Pages
@@ -625,7 +690,8 @@ const ReportPreview = ({ data, onDownload, onEdit, isEditMode, onRegenerate, cre
                                         pageCount: editPageCount,
                                         contentFontSize: editContentFontSize,
                                         chapterFontSize: editChapterFontSize,
-                                        editPrompt: editPrompt
+                                        editPrompt: editPrompt,
+                                        provider: editProvider
                                     });
 
                                     if (result && !result.success) {

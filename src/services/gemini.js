@@ -46,12 +46,100 @@ export const fetchReportContent = async (topic, apiKey, pageCount = 20, referenc
     ` : ''}
 
     ${referenceText ? `
-    The user has also uploaded a REFERENCE REPORT/DOCUMENT. Use this content to guide the style, tone, and specific extracted details.
-    REFERENCE CONTENT (Use this as context):
+    ⚠️ CRITICAL: The user has uploaded a REFERENCE DOCUMENT. Your PRIMARY task is to ANALYZE this document first.
+    
+    UPLOADED DOCUMENT CONTENT:
     """
     ${referenceText.slice(0, 50000)} 
     ...(content truncated if too long)
     """
+    
+    ${(() => {
+        const gapFillingKeywords = [
+          'add content', 'fill this section', 'complete this part', 'add explanation',
+          'write the missing content', 'expand this topic', 'elaborate this section',
+          'continue writing', 'add details', 'improve this section', 'write properly',
+          'make it complete', 'add suitable content', 'add technical explanation',
+          'expand this', 'elaborate this part', 'explain in detail', 'add more details',
+          'make this longer', 'explain more clearly', 'give detailed explanation',
+          'extend this content', 'add more information', 'write more about this',
+          'explain step by step', 'make it detailed',
+          'fill', 'complete', 'expand', 'elaborate', 'add', 'improve', 'missing',
+          'extend', 'explain', 'detail', 'longer'
+        ];
+        const isGapFilling = gapFillingKeywords.some(keyword =>
+          topic.toLowerCase().includes(keyword.toLowerCase())
+        );
+
+        if (isGapFilling) {
+          return `
+    🔴 GAP-FILLING MODE DETECTED 🔴
+    The user's request contains keywords indicating they want to FILL GAPS or EXPAND existing content:
+    User Request: "${topic}"
+    
+    YOUR TASK:
+    1. ANALYZE the uploaded document thoroughly - identify structure, chapters, and existing content
+    2. IDENTIFY what is missing, incomplete, or needs expansion based on user request
+    3. CAREFULLY READ USER INSTRUCTIONS - if they say "add X before/after Y", you MUST do it
+    4. PRESERVE all existing chapters and structure EXACTLY
+    5. ONLY mark sections for enhancement where content is weak, missing, or has placeholders
+    6. DO NOT change chapter titles or restructure unless explicitly requested in the user input
+    
+    CRITICAL - ACKNOWLEDGEMENT PLACEMENT:
+    - If user mentions "acknowledgement" without specifying location → Place it BEFORE Abstract (not after)
+    - If user says "add acknowledgement before abstract" → Place it BEFORE Abstract
+    - If user says "add acknowledgement after [location]" → Follow their specific instruction
+    - Default order: Title → Acknowledgement (if present) → Abstract → TOC → Chapters
+    - Extract acknowledgement content from uploaded document if present
+    
+    When generating the outline:
+    - Use the EXACT chapter structure from the uploaded document
+    - Use the EXACT chapter titles from the uploaded document  
+    - Add new sections ONLY where user explicitly requests (e.g., "add Acknowledgement after Abstract")
+    - Only add new chapters if the user explicitly requests it
+    - Focus on identifying subsections that need content added
+    
+    🔴 CRITICAL FOR CHAPTER REMOVAL:
+    If user asks to "remove chapter X":
+    - Remove that chapter from the outline
+    - REDISTRIBUTE the word count to remaining chapters to maintain the SAME TOTAL PAGE COUNT
+    - Example: 22-page report with 7 chapters, remove 1 chapter → remaining 6 chapters should expand to still fill 22 pages
+    - DO NOT reduce the total report length just because a chapter was removed
+            `;
+        } else {
+          return `
+    INSTRUCTIONS:
+    1. FIRST: Carefully analyze the uploaded document structure, existing chapters, and content
+    2. SECOND: Read the user's INPUT/request to understand what they want
+    3. THIRD: Based on the user's request, either:
+       - Fill in missing sections/chapters if they ask to "add content" or "complete"
+       - Expand existing content if they ask to "expand" or "elaborate"
+       - Add new sections if they specify (e.g., "add Acknowledgement before Abstract")
+       - Restructure if they ask for changes
+       - Remove chapters if requested, BUT redistribute content to maintain original page count
+    
+    CRITICAL - ACKNOWLEDGEMENT PLACEMENT:
+    - If user mentions "acknowledgement" without specifying location → Place it BEFORE Abstract (not after)
+    - If user says "add acknowledgement before abstract" → Place it BEFORE Abstract
+    - If user says "add acknowledgement after [location]" → Follow their specific instruction  
+    - Default order: Title → Acknowledgement (if present) → Abstract → TOC → Chapters
+    - Extract acknowledgement content from uploaded document if present
+    
+    CRITICAL: If user provides content and says "add [content] after [location]":
+    - Identify the content from the uploaded document
+    - Insert it at the specified location in the outline
+    - Do NOT ignore this instruction
+    
+    CRITICAL FOR CHAPTER REMOVAL:
+    If user asks to "remove chapter X":
+    - Remove that chapter from the outline
+    - REDISTRIBUTE the word count to remaining chapters to maintain the SAME TOTAL PAGE COUNT
+    - The total report length should NOT decrease when removing chapters
+            `;
+        }
+      })()}
+    
+    DO NOT create a brand new report from scratch. Use the uploaded document as the foundation.
     ` : ''}
 
     INPUT INTERPRETATION INSTRUCTIONS:
@@ -167,7 +255,7 @@ export const fetchReportContent = async (topic, apiKey, pageCount = 20, referenc
     // Length Logic
     let currentTargetWords = wordsPerChapter;
     if (isConclusion) {
-      currentTargetWords = 250; // Half page max for Conclusion
+      currentTargetWords = 150; // Half page maximum for Conclusion (universal standard)
     }
 
     // Check if we have existing content for this chapter (if editing)
@@ -179,16 +267,60 @@ export const fetchReportContent = async (topic, apiKey, pageCount = 20, referenc
       }
     }
 
+    // Detect gap-filling keywords inline
+    const gapFillingKeywords = [
+      'add content', 'fill this section', 'complete this part', 'add explanation',
+      'write the missing content', 'expand this topic', 'elaborate this section',
+      'continue writing', 'add details', 'improve this section', 'write properly',
+      'make it complete', 'add suitable content', 'add technical explanation',
+      'expand this', 'elaborate this part', 'explain in detail', 'add more details',
+      'make this longer', 'explain more clearly', 'give detailed explanation',
+      'extend this content', 'add more information', 'write more about this',
+      'explain step by step', 'make it detailed',
+      'fill', 'complete', 'expand', 'elaborate', 'add', 'improve', 'missing',
+      'extend', 'explain', 'detail', 'longer'
+    ];
+    const isGapFilling = gapFillingKeywords.some(keyword =>
+      topic.toLowerCase().includes(keyword.toLowerCase())
+    );
+
     const chapterPrompt = `
+      ${referenceText ? `
+      ⚠️ CRITICAL: User uploaded a document. ANALYZE IT FIRST before writing this chapter.
+      
+      UPLOADED CONTENT (relevant to this chapter):
+      ${referenceText.slice(0, 8000)}
+      
+      ${isGapFilling ? `
+      🔴 GAP-FILLING MODE 🔴
+      User Request: "${topic}"
+      
+      TASK: Based on the uploaded document, write content ONLY for missing/weak sections in Chapter ${chapter.number}: ${chapter.title}
+      
+      CRITICAL RULES:
+      - If uploaded document has good content for a subsection, KEEP IT EXACTLY AS IS
+      - Only add new content where there are gaps, placeholder text, or very brief content
+      - Match the writing style, tone, and technical level of the uploaded document
+      - Do NOT rewrite sections that are already complete
+      - Focus on "filling in the blanks" rather than starting fresh
+      ` : `
+      TASK: Based on the uploaded document and user request "${topic}", write content for Chapter ${chapter.number}: ${chapter.title}
+      
+      - If the uploaded document already has content for this chapter, USE IT and BUILD UPON IT
+      - Only add new content where there are gaps or missing sections
+      - Match the writing style and tone of the uploaded document
+      `}
+      ` : `
       Write DETAILED, VERBOSE, ACADEMIC content for Chapter ${chapter.number}: "${chapter.title}" for the project "${topic}".
+      `}
       Context: ${outline.abstract}
       ${referenceText ? `\nREFERENCE CONTEXT (Use relevant info): """${referenceText.slice(0, 5000)}..."""\n` : ''}
       ${existingChapterContent ? `\nPREVIOUS CONTENT (For Context - Improve/Edit this as requested): """${existingChapterContent.slice(0, 3000)}..."""\n` : ''}
       
-      ${isConclusion ? 'CONCLUSION CHAPTER - Write as a SINGLE COMPREHENSIVE PARAGRAPH (no subsections). Summarize key findings and implications.' : `Subsections to cover: ${JSON.stringify(chapter.subsections)}`}
+      ${isConclusion ? 'CONCLUSION CHAPTER - Write as a SINGLE COMPREHENSIVE PARAGRAPH (no subsections). Maximum 150 words (HALF PAGE ONLY). Summarize key findings and implications.' : `Subsections to cover: ${JSON.stringify(chapter.subsections)}`}
       
       REQUIREMENTS:
-      1.  **LENGTH**: The content of this chapter MUST be approximately ${currentTargetWords} words. ${isConclusion ? "Keep it concise (one paragraph, half page max)." : "DO NOT EXCEED significantly."}
+      1.  **LENGTH**: The content of this chapter MUST be approximately ${currentTargetWords} words. ${isConclusion ? "Keep it concise (one paragraph, HALF PAGE MAXIMUM - 150 words)." : "DO NOT EXCEED significantly."}
       2.  **FORMAT**: Use full paragraphs. NO bullet points. NO asterisks. ${isConclusion ? 'CONCLUSION must be ONE continuous paragraph.' : ''}
       3.  **SUBSECTIONS**: ${isConclusion ? 'NO SUBSECTIONS for conclusion.' : 'Ensure you generate content for every subsection listed.'}
       4.  **TITLES**: Do NOT include numbering in the "title" field of the subsection (e.g., just "Overview", NOT "1.1 Overview").

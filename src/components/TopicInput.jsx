@@ -1,12 +1,12 @@
 import { useState, useRef } from 'react';
-import { BookOpen, ArrowRight, FileText, Key, Upload, X, CheckCircle, Loader2 } from 'lucide-react';
+import { BookOpen, ArrowRight, FileText, Key, Upload, X, CheckCircle, Loader2, Sparkles } from 'lucide-react';
 import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
 
 // Set worker source for pdfjs
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
-const TopicInput = ({ onGenerate, isLoading, errorMessage = '', isMobile = false }) => {
+const TopicInput = ({ onGenerate, isLoading, errorMessage = '', onClearError, provider: externalProvider, onProviderChange, isMobile = false }) => {
     const [topic, setTopic] = useState('');
     const [pageCount, setPageCount] = useState(20);
     const [imageCount] = useState(0); // Images disabled - set to 0
@@ -22,6 +22,10 @@ const TopicInput = ({ onGenerate, isLoading, errorMessage = '', isMobile = false
     const [extractedText, setExtractedText] = useState('');
     const [isProcessingFile, setIsProcessingFile] = useState(false);
     const fileInputRef = useRef(null);
+
+    // Use controlled provider from parent, fallback to local state if not provided
+    const provider = externalProvider !== undefined ? externalProvider : 'gemini';
+    const setProvider = onProviderChange || (() => { });
 
     const handleFileChange = async (e) => {
         const selectedFile = e.target.files[0];
@@ -100,36 +104,128 @@ const TopicInput = ({ onGenerate, isLoading, errorMessage = '', isMobile = false
             return;
         }
         if (!apiKey.trim()) {
-            setError('Please provide your Google Gemini API Key.');
+            setError(`Please provide your ${provider === 'gemini' ? 'Google Gemini' : 'Groq'} API Key.`);
             return;
         }
 
         setError('');
         // Pass all parameters including font sizes
-        onGenerate(topic, pageCount, apiKey, extractedText, imageCount, contentFontSize, chapterFontSize);
+        onGenerate(topic, pageCount, apiKey.trim(), extractedText, imageCount, contentFontSize, chapterFontSize, provider);
     };
 
     return (
         <div className="glass-panel responsive-container">
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '1rem' : '1.5rem' }}>
 
+                {/* Provider Selection */}
+                <div style={{ textAlign: 'left' }}>
+                    <label style={{ display: 'block', marginBottom: isMobile ? '0.35rem' : '0.5rem', fontSize: isMobile ? '0.8rem' : '1.1rem', color: 'white' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Sparkles size={isMobile ? 14 : 18} /> Select AI Model
+                        </div>
+                    </label>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setProvider('gemini');
+                                if (onClearError) onClearError();
+                            }}
+                            style={{
+                                flex: 1,
+                                padding: '0.75rem',
+                                borderRadius: '8px',
+                                border: provider === 'gemini' ? '2px solid #e25a83' : '1px solid rgba(255,255,255,0.2)',
+                                background: provider === 'gemini' ? 'rgba(226, 90, 131, 0.2)' : 'rgba(0,0,0,0.3)',
+                                color: 'white',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                fontWeight: provider === 'gemini' ? 'bold' : 'normal'
+                            }}
+                        >
+                            Google Gemini
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setProvider('groq');
+                                if (onClearError) onClearError();
+                            }}
+                            style={{
+                                flex: 1,
+                                padding: '0.75rem',
+                                borderRadius: '8px',
+                                border: provider === 'groq' ? '2px solid #10a37f' : '1px solid rgba(255,255,255,0.2)',
+                                background: provider === 'groq' ? 'rgba(16, 163, 127, 0.2)' : 'rgba(0,0,0,0.3)',
+                                color: 'white',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                fontWeight: provider === 'groq' ? 'bold' : 'normal'
+                            }}
+                        >
+                            Groq Llama 3.3
+                        </button>
+                    </div>
+                </div>
+
                 {/* API Key Input */}
                 <div style={{ textAlign: 'left' }}>
                     <label style={{ display: 'block', marginBottom: isMobile ? '0.35rem' : '0.5rem', fontSize: isMobile ? '0.8rem' : '1.1rem', color: 'white' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Key size={isMobile ? 14 : 18} /> AI API Key
+                            <Key size={isMobile ? 14 : 18} /> {provider === 'gemini' ? 'Gemini' : 'Groq'} API Key
                         </div>
                     </label>
                     <input
                         type="password"
-                        placeholder="Paste your API Key here"
+                        placeholder={`Paste your ${provider === 'gemini' ? 'Gemini' : 'Groq'} API Key here`}
                         value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            setApiKey(val);
+
+                            // Smart Switch: Auto-detect provider based on key prefix (handle whitespace)
+                            const cleanVal = val.trim();
+                            console.log('[Smart Switch] API Key Input:', {
+                                raw: val.substring(0, 10) + '...',
+                                trimmed: cleanVal.substring(0, 10) + '...',
+                                currentProvider: provider
+                            });
+
+                            if (cleanVal.startsWith('gsk_') && provider !== 'groq') {
+                                console.log('[Smart Switch] Detected Groq key, switching from', provider, 'to groq');
+                                setProvider('groq');
+                            } else if (cleanVal.startsWith('AIza') && provider !== 'gemini') {
+                                console.log('[Smart Switch] Detected Gemini key, switching from', provider, 'to gemini');
+                                setProvider('gemini');
+                            }
+
+                            if (onClearError) onClearError();
+                        }}
                         disabled={isLoading}
                     />
                     <div style={{ fontSize: isMobile ? '0.7rem' : '0.9rem', marginTop: '0.4rem', color: 'var(--color-accent-primary)' }}>
-                        Don't have one? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: 'white' }}>Get it here</a> <span style={{ color: 'white' }}>(Free)</span>
+                        Don't have one? <a
+                            href={provider === 'gemini' ? "https://aistudio.google.com/app/apikey" : "https://console.groq.com/keys"}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{ color: 'white' }}
+                        >
+                            Get it here
+                        </a> <span style={{ color: 'white' }}>({provider === 'gemini' ? 'Free' : 'Free'})</span>
                     </div>
+
+                    {/* Debug: Show detected provider */}
+                    {apiKey && (
+                        <div style={{
+                            fontSize: '0.75rem',
+                            marginTop: '0.3rem',
+                            color: provider === 'groq' ? '#10a37f' : '#e25a83',
+                            fontWeight: 'bold'
+                        }}>
+                            ✓ {provider === 'groq' ? 'Groq' : 'Gemini'} key detected
+                        </div>
+                    )}
+
                     {/* Show API key error inline */}
                     {errorMessage && (
                         <div style={{

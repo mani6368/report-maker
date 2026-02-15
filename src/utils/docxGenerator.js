@@ -277,7 +277,7 @@ export const generateDocx = async (data, contentFontSize = 14, chapterFontSize =
       children: [
         new BookmarkStart(getAbstractBm()),
         new BookmarkEnd(getAbstractBm()), // Point Bookmark
-        new TextRun({ text: "ABSTRACT", color: BLACK_COLOR, bold: true, size: 32 })
+        new TextRun({ text: "ABSTRACT", color: BLACK_COLOR, bold: true, size: CHAPTER_FONT_SIZE })
       ],
       alignment: AlignmentType.CENTER,
       pageBreakBefore: true
@@ -361,7 +361,7 @@ export const generateDocx = async (data, contentFontSize = 14, chapterFontSize =
       children: [
         new BookmarkStart(getRefBm()),
         new BookmarkEnd(getRefBm()), // Point Bookmark
-        new TextRun({ text: "REFERENCES", color: BLACK_COLOR, bold: true, size: 32 })
+        new TextRun({ text: "REFERENCES", color: BLACK_COLOR, bold: true, size: CHAPTER_FONT_SIZE })
       ],
       alignment: AlignmentType.CENTER,
       pageBreakBefore: true
