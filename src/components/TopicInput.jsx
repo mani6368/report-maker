@@ -140,10 +140,16 @@ const TopicInput = ({ onGenerate, isLoading, errorMessage = '', onClearError, pr
                                 color: 'white',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s',
-                                fontWeight: provider === 'gemini' ? 'bold' : 'normal'
+                                fontWeight: provider === 'gemini' ? 'bold' : 'normal',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.3rem'
                             }}
                         >
-                            Google Gemini
+                            <span>Google Gemini</span>
+                            <span style={{ fontSize: '0.7rem', fontWeight: 'normal', opacity: 0.8, fontStyle: 'italic' }}>
+                                Best for under 60 pages
+                            </span>
                         </button>
                         <button
                             type="button"
@@ -160,10 +166,16 @@ const TopicInput = ({ onGenerate, isLoading, errorMessage = '', onClearError, pr
                                 color: 'white',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s',
-                                fontWeight: provider === 'groq' ? 'bold' : 'normal'
+                                fontWeight: provider === 'groq' ? 'bold' : 'normal',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.3rem'
                             }}
                         >
-                            Groq Llama 3.3
+                            <span>Groq Llama 3.3</span>
+                            <span style={{ fontSize: '0.7rem', fontWeight: 'normal', opacity: 0.8, fontStyle: 'italic' }}>
+                                Best for under 30 pages
+                            </span>
                         </button>
                     </div>
                 </div>

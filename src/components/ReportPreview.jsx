@@ -480,10 +480,16 @@ const ReportPreview = ({ data, onDownload, onEdit, isEditMode, onRegenerate, cre
                                     background: editProvider === 'gemini' ? 'rgba(226, 90, 131, 0.2)' : 'rgba(0,0,0,0.3)',
                                     color: 'white',
                                     cursor: 'pointer',
-                                    fontWeight: editProvider === 'gemini' ? 'bold' : 'normal'
+                                    fontWeight: editProvider === 'gemini' ? 'bold' : 'normal',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '0.3rem'
                                 }}
                             >
-                                Google Gemini
+                                <span>Google Gemini</span>
+                                <span style={{ fontSize: '0.65rem', fontWeight: 'normal', opacity: 0.8, fontStyle: 'italic' }}>
+                                    Best for under 60 pages
+                                </span>
                             </button>
                             <button
                                 onClick={() => setEditProvider('groq')}
@@ -495,10 +501,16 @@ const ReportPreview = ({ data, onDownload, onEdit, isEditMode, onRegenerate, cre
                                     background: editProvider === 'groq' ? 'rgba(16, 163, 127, 0.2)' : 'rgba(0,0,0,0.3)',
                                     color: 'white',
                                     cursor: 'pointer',
-                                    fontWeight: editProvider === 'groq' ? 'bold' : 'normal'
+                                    fontWeight: editProvider === 'groq' ? 'bold' : 'normal',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '0.3rem'
                                 }}
                             >
-                                Groq Llama 3.3
+                                <span>Groq Llama 3.3</span>
+                                <span style={{ fontSize: '0.65rem', fontWeight: 'normal', opacity: 0.8, fontStyle: 'italic' }}>
+                                    Best for under 30 pages
+                                </span>
                             </button>
                         </div>
                     </div>

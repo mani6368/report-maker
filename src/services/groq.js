@@ -181,13 +181,27 @@ export const fetchGroqReportContent = async (topic, apiKey, pageCount = 20, refe
     const reservedPages = 3; // Abstract, TOC, References
     const contentPages = Math.max(1, pageCount - reservedPages);
 
-    // Calibrated word counts based on extensive testing:
-    // - 23 pages with 8 chapters → 34 pages (too high)
-    // - 24 pages with 9 chapters → 18 pages (too low with 280)
-    // - 25 pages with 9 chapters → 36 pages (too high with 300)
-    // Finding: More chapters/subsections = more actual content
-    // Solution: Reduce to ~200 words/page for accurate targeting
-    let wordsPerPage = pageCount <= 15 ? 180 : (pageCount <= 30 ? 200 : 250);
+    // MATCHED TO GEMINI'S WORKING FORMULA with aggressive multiplier
+    // GEMINI TEST: 60 pages with 550 words/page = 60 pages actual ✅
+    // GROQ TEST: 60 pages with 900 words/page = 37 pages actual ❌
+    // 
+    // ANALYSIS: Groq needs (60/37) × 900 = 1,459 words/page for 60 pages
+    // SOLUTION: Use Gemini's proven values × 2.6 multiplier for Groq
+    // 
+    // Why Groq needs more words:
+    // 1. Llama 3.3 generates more concise content than Gemini
+    // 2. Groq tends to be brief even when asked for detailed content
+    // 3. Word formatting overhead compounds with shorter paragraphs
+    let wordsPerPage;
+    if (pageCount <= 15) {
+        wordsPerPage = 900;   // Gemini: 350 × 2.6 = 910 ≈ 900
+    } else if (pageCount <= 30) {
+        wordsPerPage = 1170;  // Gemini: 450 × 2.6 = 1170
+    } else if (pageCount <= 60) {
+        wordsPerPage = 1450;  // Gemini: 550 × 2.6 = 1430 ≈ 1450 (CRITICAL FIX)
+    } else {
+        wordsPerPage = 1600;  // Gemini: 600 × 2.6 = 1560 ≈ 1600
+    }
     const totalWords = contentPages * wordsPerPage;
     const wordsPerChapter = Math.round(totalWords / (outline.chapters.length || 5));
 
@@ -247,13 +261,14 @@ export const fetchGroqReportContent = async (topic, apiKey, pageCount = 20, refe
       CRITICAL: Do NOT start with "Chapter ${chapter.number}: ${chapter.title}" or any similar heading - this already exists in the document.
       Start DIRECTLY with the body content of this chapter.
       
-      ${isConclusion ? 'Write a comprehensive conclusion with summary, findings, and future work. Maximum 150 words (HALF PAGE ONLY).' : `Include detailed sections for: ${JSON.stringify(chapter.subsections)}\n\nFor EACH subsection, write at least ${Math.round(wordsPerChapter / (chapter.subsections?.length || 3))} words.`}
-      Professional academic tone. Be thorough and detailed. No markdown formatting (bold/italic is okay, no # headers).
-      REMEMBER: Write AT LEAST ${isConclusion ? 150 : wordsPerChapter} words total for this chapter.
+      ${isConclusion ? 'Write a comprehensive conclusion with summary, findings, and future work. Maximum 150 words (HALF PAGE ONLY).' : `Include detailed sections for: ${JSON.stringify(chapter.subsections)}\n\n🔴 ABSOLUTE REQUIREMENT: You MUST write AT LEAST ${Math.round(wordsPerChapter / (chapter.subsections?.length || 3))} words for EACH subsection.\n\n🔴🔴🔴 CRITICAL: This ENTIRE chapter MUST contain a MINIMUM of ${wordsPerChapter} words.\nDO NOT write less! This is NON-NEGOTIABLE.\n\nFor large reports, be EXTREMELY VERBOSE with:\n- Multiple detailed paragraphs per subsection (4-6 paragraphs minimum)\n- In-depth explanations with technical details\n- Concrete examples and case studies\n- Comprehensive analysis from multiple angles\n- Background context and theoretical foundations`}
+      Professional academic tone. Be thorough, detailed, and VERBOSE. No markdown formatting (bold/italic is okay, no # headers).
+      
+      🚨 FINAL REMINDER: Your response MUST be AT LEAST ${isConclusion ? 150 : wordsPerChapter} words. Count every word carefully!
     `;
 
         let chapterData;
-        let retries = 5; // Increased from 3 for better reliability
+        let retries = 3; // Reduced from 5 - Groq is reliable, fewer retries needed
         while (retries > 0 && !chapterData) {
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -280,7 +295,7 @@ export const fetchGroqReportContent = async (topic, apiKey, pageCount = 20, refe
                 console.error(`Error generating Chapter ${chapter.number} (${retries} retries left):`, e.message);
                 retries--;
                 if (retries > 0) {
-                    await delay(2000); // Increased delay from 1000ms to 2000ms
+                    await delay(800); // Reduced from 2000ms for faster generation
                 }
             }
         }

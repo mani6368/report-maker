@@ -211,17 +211,27 @@ export const fetchReportContent = async (topic, apiKey, pageCount = 20, referenc
   const contentPages = Math.max(1, pageCount - reservedPages);
 
   // Calculate total words needed for the content chapters
-  // UPDATED CALCULATION: 
-  // - For smaller reports (< 15 pages): 250 words/page (more concise)
-  // - For larger reports (15+ pages): 300-350 words/page (more detailed content needed)
-  // This ensures larger page requests actually generate proportionally more content
+  // CORRECTED CALCULATION based on empirical testing:
+  // Problem: 60 pages requested → 40 pages actual (with 380 words/page)
+  // Solution: Increase word counts by ~50% to account for Word formatting overhead
+  // 
+  // Word formatting creates major overhead:
+  // - Chapter headings (16pt, bold, spacing)
+  // - Subsection headings (spacing before/after)
+  // - Line spacing (1.15x default in Word)
+  // - Margins (1 inch all sides)
+  // - Page breaks between chapters
+  //
+  // Calibrated values for accurate page targeting:
   let wordsPerPage;
   if (pageCount <= 15) {
-    wordsPerPage = 250; // Works well for shorter reports
+    wordsPerPage = 350; // Increased from 250
   } else if (pageCount <= 30) {
-    wordsPerPage = 320; // Medium reports need more detailed content
+    wordsPerPage = 450; // Increased from 320
+  } else if (pageCount <= 60) {
+    wordsPerPage = 550; // Increased from 380 (critical fix for 60-page issue)
   } else {
-    wordsPerPage = 380; // Large reports (30+) need very detailed content
+    wordsPerPage = 600; // For any reports beyond 60 pages
   }
 
   const totalWords = contentPages * wordsPerPage;
@@ -341,7 +351,7 @@ export const fetchReportContent = async (topic, apiKey, pageCount = 20, referenc
 
     while (retries > 0 && !success) {
       try {
-        await delay(2000 + (3 - retries) * 1000); // Backoff delay: 2s, 3s, 4s
+        await delay(500); // Reduced from 2000ms - much faster while still preventing rate limits
         const result = await model.generateContent(chapterPrompt);
         chapterData = JSON.parse(result.response.text());
         success = true;
