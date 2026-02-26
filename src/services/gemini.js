@@ -145,6 +145,12 @@ export const fetchReportContent = async (topic, apiKey, pageCount = 20, referenc
     INPUT INTERPRETATION INSTRUCTIONS:
     1. **If the INPUT is a simple title** (e.g., "Electric Vehicles"), use it as the Project Title and generate a standard academic structure with EXACTLY 5 CHAPTERS.
     2. **If the INPUT specifies chapters/subheadings** (e.g., "Make a report with 7 chapters: Intro, History..."), extract the Project Title and use the exact structure requested by the user.
+    3. **If the INPUT is a FULL TABLE OF CONTENTS** (contains lines like "Chapter X:" or "X.X SubsectionTitle"), you MUST:
+       - Extract the title from context (or infer a reasonable title)
+       - Use EVERY chapter listed EXACTLY as given — do NOT add or remove chapters
+       - Use EVERY subsection listed EXACTLY as given — do NOT truncate, skip, or limit subsections
+       - Preserve sub-subsections (e.g., 3.6.1, 4.5.2) — include them nested inside the parent subsection
+       - Do NOT apply any chapter or subsection count limits
     
     CRITICAL: Do not use Word's 'Table of Contents' field or dotted leaders in any output.
     Generate the following content as a Standard 3-Column Markdown Table if asked for structure.
@@ -154,8 +160,12 @@ export const fetchReportContent = async (topic, apiKey, pageCount = 20, referenc
     
     CHAPTER STRUCTURE RULES:
     - **DEFAULT**: Generate exactly 5 chapters (unless user specifies otherwise)
-    - **SUBSECTIONS**: Maximum 5 subsections per chapter (unless user requests more)
-    - **CONCLUSION**: The final chapter should be titled "CONCLUSION" with NO subsections (it will be a single paragraph)
+    - **SUBSECTIONS**: Use ALL subsections the user specifies. Only apply a "maximum 5" limit if the user did NOT provide a structure.
+    - **CONCLUSION**: The final chapter should be titled "CONCLUSION" with NO subsections ONLY if the user did not specify subsections for it.
+    
+    🔴 CRITICAL — FULL TOC MODE:
+    If the user's input contains numbered subsections (like "1.1", "2.3", "4.5.1"), treat this as an EXACT BLUEPRINT.
+    You MUST include ALL of them in the outline. Skipping or limiting subsections is FORBIDDEN.
     
     The report must be VERY LONG (aiming for ${pageCount}+ pages total).
     
@@ -165,7 +175,7 @@ export const fetchReportContent = async (topic, apiKey, pageCount = 20, referenc
       "abstract": "Detailed abstract (approx 150-200 words, fit on half page)...",
       "chapters": [
         { "number": 1, "title": "INTRODUCTION", "subsections": [{"title": "Problem Statement"}, {"title": "Scope"}] },
-        { "number": 2, "title": "CHAPTER TITLE", "subsections": [ ... max 5 subsections ... ] },
+        { "number": 2, "title": "CHAPTER TITLE", "subsections": [ ... ALL user-specified subsections ... ] },
         { "number": 5, "title": "CONCLUSION", "subsections": [] }
       ],
       "references": [
